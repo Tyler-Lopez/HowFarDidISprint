@@ -29,6 +29,8 @@ object DistanceTracker {
     var totalDistance: Long = 0L
 }
 
+
+
 class GpsTrackerService : Service(){
 
     private var startId = 0
