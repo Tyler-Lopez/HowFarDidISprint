@@ -1,4 +1,7 @@
-import android.annotation.SuppressLint
+package com.company.howfardidisprint
+
+import GpsTrackerService.Companion.ACTION_STOP_TRACKING
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,29 +10,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.company.howfardidisprint.BuildConfig
 import com.google.android.gms.location.*
 
-/*
- * start: startService(GpsTrackerService.getIntent(this@Your_Activity_Name))
- * stop: GpsTrackerService.stopTracking(this@Your_Activity_Name)
- *
- * To count distance, keep a singleton and add the calculated distance into it. For example,
- *    DistanceTracker.totalDistance += calculatedDistance
- */
-
-object DistanceTracker {
-    var totalDistance: Long = 0L
-}
-
-class GpsTrackerService : Service(){
+class LocationTrackingService : Service() {
 
     private var startId = 0
 
@@ -40,8 +32,7 @@ class GpsTrackerService : Service(){
 
     private val actionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-
-            when(intent?.extras?.getString(ACTION_NAME)){
+            when (intent?.extras?.getString(ACTION_NAME)) {
                 ACTION_STOP_TRACKING -> stopTrackingService()
             }
         }
@@ -55,35 +46,22 @@ class GpsTrackerService : Service(){
         const val ACTION_START_TRACKING = "ACTION_START_TRACKING"
         const val ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING"
 
-        fun getIntent(context: Context) = Intent(context, GpsTrackerService::class.java)
+        fun getIntent(context: Context) = Intent(context, LocationTrackingService::class.java)
 
         fun stopTracking(context: Context) =
             context.sendBroadcast(Intent(GPS_ACTION).apply { putExtra(ACTION_NAME, ACTION_STOP_TRACKING) })
-
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        TODO("not implemented")
+    override fun onBind(p0: Intent?): IBinder? {
+        TODO("Not yet implemented")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        DistanceTracker.totalDistance = 0L
-
         this.startId = startId
-
         startForeground(startId, getNotification())
-
-        startLocationTracking()
-
+        startLocationUpdates()
         registerReceiver(actionReceiver, IntentFilter(GPS_ACTION))
-
         return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onDestroy() {
-        kotlin.runCatching { unregisterReceiver(actionReceiver) }
-        super.onDestroy()
     }
 
     private fun stopTrackingService(){
@@ -96,19 +74,37 @@ class GpsTrackerService : Service(){
 
     }
 
-    // Do the permissions stuff before starting this service.
-    @SuppressLint("MissingPermission")
-    private fun startLocationTracking(){
-        println("Here!!!")
+    override fun onDestroy() {
+        kotlin.runCatching { unregisterReceiver(actionReceiver) }
+        super.onDestroy()
+    }
+
+    protected fun startLocationUpdates() {
+        // initialize location request object
+        // Reset distance and last location location
+        DistanceTracker.totalDistance = 0L
+        lastLocation = null
 
         val locationRequest = LocationRequest().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 5
-            smallestDisplacement = 0.0F
+            interval = 4000
+            smallestDisplacement = 3.0F
         }
 
+        // initialize locationo setting request builder object
+        val builder = LocationSettingsRequest.Builder()
+        builder.addLocationRequest(locationRequest!!)
+        val locationSettingsRequest = builder.build()
+
+        // initialize location service object
+        val settingsClient = LocationServices.getSettingsClient(this)
+        settingsClient!!.checkLocationSettings(locationSettingsRequest)
+
+        // call register location listner
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(result: LocationResult?) {
+
+
 
                 result?.let {
 
@@ -118,14 +114,10 @@ class GpsTrackerService : Service(){
                     }
 
                     it.lastLocation?.let { its_last ->
-
                         val distanceInMeters = its_last.distanceTo(lastLocation)
-
                         DistanceTracker.totalDistance += distanceInMeters.toLong()
-
+                        if (DistanceTracker.totalDistance >= 400L) TrackingData.isTracking = false // If we're over 400 meters stop tracking!
                         println("TRACKER" + "Completed: ${DistanceTracker.totalDistance} meters, (added $distanceInMeters)")
-
-
                     }
 
                     lastLocation = it.lastLocation
@@ -137,15 +129,29 @@ class GpsTrackerService : Service(){
         }
 
         fusedClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
         fusedClient.requestLocationUpdates(locationRequest, locationCallback, null)
-
     }
 
     private fun stopLocationTracking(){
         fusedClient.removeLocationUpdates(locationCallback)
     }
-
-
     private fun getNotification(): Notification? {
 
         val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -160,7 +166,7 @@ class GpsTrackerService : Service(){
 
         b.setOngoing(true)
             .setContentTitle("Currently tracking GPS location...")
-           // .setSmallIcon(R.mipmap.ic_launcher)
+        // .setSmallIcon(R.mipmap.ic_launcher)
 
         return b.build()
     }
@@ -174,4 +180,6 @@ class GpsTrackerService : Service(){
         service.createNotificationChannel(chan)
         return channelId
     }
+
+
 }
