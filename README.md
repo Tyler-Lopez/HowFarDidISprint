@@ -1,1 +1,1 @@
-# SprintLeaderboards
+# SprintLogger
