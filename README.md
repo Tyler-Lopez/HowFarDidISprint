@@ -2,3 +2,4 @@
      
 ## About
      
+This Android application in development will allow the user to track their fastest 400 m sprint times day-to-day. 
