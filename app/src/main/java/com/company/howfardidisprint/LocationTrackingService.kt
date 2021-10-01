@@ -1,7 +1,7 @@
 package com.company.howfardidisprint
 
-import GpsTrackerService.Companion.ACTION_STOP_TRACKING
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,7 +15,6 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.IBinder
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -75,77 +74,55 @@ class LocationTrackingService : Service() {
     }
 
     override fun onDestroy() {
+        lastLocation = null
         kotlin.runCatching { unregisterReceiver(actionReceiver) }
         super.onDestroy()
     }
 
-    protected fun startLocationUpdates() {
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates() {
         // initialize location request object
         // Reset distance and last location location
         DistanceTracker.totalDistance = 0L
+        DistanceTracker.latestSpeed = 0f
         lastLocation = null
 
         val locationRequest = LocationRequest().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 4000
-            smallestDisplacement = 3.0F
+            interval = 2000
+            smallestDisplacement = 2.0F
         }
 
         // initialize locationo setting request builder object
-        val builder = LocationSettingsRequest.Builder()
-        builder.addLocationRequest(locationRequest!!)
-        val locationSettingsRequest = builder.build()
+   //     val builder = LocationSettingsRequest.Builder()
+    //    builder.addLocationRequest(locationRequest!!)
+   //     val locationSettingsRequest = builder.build()
 
         // initialize location service object
-        val settingsClient = LocationServices.getSettingsClient(this)
-        settingsClient!!.checkLocationSettings(locationSettingsRequest)
+      //  val settingsClient = LocationServices.getSettingsClient(this)
+      //  settingsClient!!.checkLocationSettings(locationSettingsRequest)
 
         // call register location listner
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(result: LocationResult?) {
-
-
-
                 result?.let {
-
-                    if(lastLocation == null){
+                    if (lastLocation == null) {
                         lastLocation = it.lastLocation
                         return@let
                     }
-
                     it.lastLocation?.let { its_last ->
                         val distanceInMeters = its_last.distanceTo(lastLocation)
+                        DistanceTracker.latestSpeed = its_last.speed
                         DistanceTracker.totalDistance += distanceInMeters.toLong()
                         if (DistanceTracker.totalDistance >= 400L) TrackingData.isTracking = false // If we're over 400 meters stop tracking!
                         println("TRACKER" + "Completed: ${DistanceTracker.totalDistance} meters, (added $distanceInMeters)")
+                        lastLocation = its_last
                     }
-
-                    lastLocation = it.lastLocation
-
                 }
-
                 super.onLocationResult(result)
             }
         }
-
         fusedClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
         fusedClient.requestLocationUpdates(locationRequest, locationCallback, null)
     }
 

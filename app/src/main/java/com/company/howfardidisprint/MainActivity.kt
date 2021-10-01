@@ -1,13 +1,6 @@
 package com.company.howfardidisprint
 
-import DistanceTracker
-import android.Manifest
-import android.content.pm.PackageManager
-import android.location.Location
-import android.os.Build
 import android.os.Bundle
-import android.os.Looper
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -37,13 +30,6 @@ import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
 
-    val FINE_LOCATION_RQ = 101
-    val CAMERA_RQ = 102
-    private var mLocationRequest: LocationRequest? = null
-    private val UPDATE_INTERVAL: Long = 10 * 100;
-    private val FASTEST_INTERVAL: Long = 500;
-    private var lastLocation: Location? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -63,18 +49,22 @@ class MainActivity : ComponentActivity() {
                     var time by rememberSaveable {
                         mutableStateOf(TrackingData.timeTracked)
                     }
+                    var speed by rememberSaveable {
+                        mutableStateOf(DistanceTracker.latestSpeed)
+                    }
                     LaunchedEffect(key1 = time) {
-                        if (running) {
+                        if (running && time != 0) {
                             running = TrackingData.isTracking
+                            speed = DistanceTracker.latestSpeed
                             distance = DistanceTracker.totalDistance
                             delay(1000L)
                             TrackingData.timeTracked++
                             time = TrackingData.timeTracked
-                        } else if(time > 0) {
+                        } else if (time > 0) {
                             leaderBoards.add(ScoreEntry(time)) // Add the amount of meters to leaderboard
-                            stopService(LocationTrackingService.getIntent(this@MainActivity))
                             LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
-                        } else if(time != 0) {
+                            stopService(LocationTrackingService.getIntent(this@MainActivity))
+                        } else if (time != 0) {
                             running = TrackingData.isTracking
                             delay(1000L)
                             TrackingData.timeTracked++
@@ -85,11 +75,8 @@ class MainActivity : ComponentActivity() {
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val maxHeight = this.maxHeight
                         val dirtStart = this.maxHeight / 3
-
-
+                        // Canvas containing artwork for backdrop
                         Canvas(modifier = Modifier.fillMaxSize()) {
-
-
                             for (i in 0..60) {
                                 drawRect(
                                     color =
@@ -100,6 +87,18 @@ class MainActivity : ComponentActivity() {
                                     size = Size(25.dp.toPx(), 40.dp.toPx()),
                                     topLeft = Offset(
                                         i * 25.dp.toPx(),
+                                        maxHeight.toPx() - dirtStart.toPx() - 30.dp.toPx()
+                                    )
+                                )
+                                drawRect(
+                                    color =
+                                    if (i % 2 == 0)
+                                        Color(101, 184, 67)
+                                    else
+                                        Color(42, 111, 23),
+                                    size = Size(5.dp.toPx(), 50.dp.toPx()),
+                                    topLeft = Offset(
+                                        (i * 25).dp.toPx() - 25.dp.toPx(),
                                         maxHeight.toPx() - dirtStart.toPx() - 30.dp.toPx()
                                     )
                                 )
@@ -136,6 +135,28 @@ class MainActivity : ComponentActivity() {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Top
                         ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "SPEED  ",
+                                    fontSize = 40.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                    color = Color(230, 209, 27),
+                                )
+                                Text(
+                                    text = "%.2f".format(speed),
+                                    fontSize = 40.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                    color = Color(255, 255, 255),
+                                )
+                            }
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -187,7 +208,6 @@ class MainActivity : ComponentActivity() {
                                     .height(100.dp)
                                     .width(250.dp),
                                 onClick = {
-                                    //  startLocationUpdates()
                                     if (!running) {
                                         startService(LocationTrackingService.getIntent(this@MainActivity))
                                         TrackingData.isTracking = true
@@ -233,10 +253,12 @@ class MainActivity : ComponentActivity() {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Column(modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                     for (score in leaderBoards) {
-                                        Card(modifier = Modifier.width(200.dp)) {
+                                        Card(modifier = Modifier.width(200.dp).padding(top = 5.dp)) {
                                             Text(
                                                 text = "${score.meters}",
                                                 fontSize = 20.sp,
@@ -256,105 +278,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-
-
-
-protected fun startLocationUpdates() {
-    // initialize location request object
-    mLocationRequest = LocationRequest.create()
-    mLocationRequest!!.run {
-        setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-        setInterval(UPDATE_INTERVAL)
-        setFastestInterval(FASTEST_INTERVAL)
+    // If the app is paused, stop the service and reset
+    override fun onPause() {
+        // https://stackoverflow.com/questions/10971284/detect-activity-being-paused-due-to-configuration-change
+        if (!isChangingConfigurations) {
+            DistanceTracker.totalDistance = 0L
+            TrackingData.isTracking = false
+            TrackingData.timeTracked = 0
+            LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
+            stopService(LocationTrackingService.getIntent(this@MainActivity))
+        }
+        super.onPause()
     }
-
-    // initialize locationo setting request builder object
-    val builder = LocationSettingsRequest.Builder()
-    builder.addLocationRequest(mLocationRequest!!)
-    val locationSettingsRequest = builder.build()
-
-    // initialize location service object
-    val settingsClient = LocationServices.getSettingsClient(this)
-    settingsClient!!.checkLocationSettings(locationSettingsRequest)
-
-    // call register location listner
-    registerLocationListner()
-
-
-}
-
-private fun registerLocationListner() {
-    // initialize location callback object
-    val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            onLocationChanged(locationResult!!.getLastLocation())
+    override fun onDestroy() {
+        super.onDestroy()
+        if (!isChangingConfigurations) {
+            DistanceTracker.totalDistance = 0L
+            TrackingData.isTracking = false
+            TrackingData.timeTracked = 0
+            LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
+            stopService(LocationTrackingService.getIntent(this@MainActivity))
         }
     }
-    // add permission if android version is greater then 23
-    if (Build.VERSION.SDK_INT >= 23 && checkPermission()) {
-        LocationServices.getFusedLocationProviderClient(this)
-            .requestLocationUpdates(mLocationRequest, locationCallback, Looper.myLooper())
-    }
-}
-
-private fun onLocationChanged(location: Location) {
-    // create message for toast with updated latitude and longitude
-    var msg = "Updated Location: " + location.latitude + " , " + location.longitude
-
-    if (lastLocation == null) {
-        lastLocation = location
-    }
-
-    location.let { its_last ->
-
-        val distanceInMeters = its_last.distanceTo(lastLocation)
-
-        DistanceTracker.totalDistance += distanceInMeters.toLong()
-
-        println("TRACKER" + "Completed: ${DistanceTracker.totalDistance} meters, (added $distanceInMeters)")
-    }
-    lastLocation = location
-
-    // show toast message with updated location
-    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-
-}
-
-private fun checkPermission(): Boolean {
-    if (ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    ) {
-        return true;
-    } else {
-        requestPermissions()
-        return false
-    }
-}
-
-private fun requestPermissions() {
-    ActivityCompat.requestPermissions(
-        this,
-        arrayOf("Manifest.permission.ACCESS_FINE_LOCATION"),
-        1
-    )
-}
-
-override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<out String>,
-    grantResults: IntArray
-) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    if (requestCode == 1) {
-        if (permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION) {
-            registerLocationListner()
-        }
-    }
-}
-
 }
 
 
