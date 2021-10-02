@@ -21,6 +21,7 @@ import com.company.howfardidisprint.ui.theme.roboto
 fun WhiteButton(value: String, onClick: () -> Unit) {
     Button(
         onClick = {
+            onClick()
         },
         shape = RoundedCornerShape(5.dp),
         modifier = Modifier

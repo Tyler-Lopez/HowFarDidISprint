@@ -17,14 +17,17 @@ abstract class ScoreEntryRoomDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): ScoreEntryRoomDatabase {
             synchronized(this) {
-            return INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    ScoreEntryRoomDatabase::class.java,
-                    "scoreentry_database"
-                )
-                    .build().also {
-                        INSTANCE = it
-                    }
+                var instance = INSTANCE
+
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
+                        context.applicationContext,
+                        ScoreEntryRoomDatabase::class.java,
+                        "score_list_database"
+                    ).fallbackToDestructiveMigration().build()
+                    INSTANCE = instance
+                }
+                return instance
             }
         }
     }

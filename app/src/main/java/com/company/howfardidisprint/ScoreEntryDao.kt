@@ -11,12 +11,12 @@ import androidx.room.Query
 // https://www.youtube.com/watch?v=lwAvI3WDXBY @ 6:30
 @Dao
 interface ScoreEntryDao {
-    @Query("SELECT * FROM ScoreEntry ORDER BY time ASC")
+    @Query("SELECT * FROM score_list ORDER BY time ASC")
     fun getScores(): LiveData<List<ScoreEntry>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(score: ScoreEntry)
 
-    @Query("DELETE FROM ScoreEntry")
-    suspend fun deleteAll()
+//    @Query("DELETE FROM score_list")
+  //  suspend fun deleteAll()
 }

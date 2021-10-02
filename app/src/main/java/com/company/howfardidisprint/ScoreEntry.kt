@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 import java.time.LocalDate
 import java.util.*
 
-@Entity(tableName = "ScoreEntry")
+@Entity(tableName = "score_list")
 data class ScoreEntry(
     @PrimaryKey
     @ColumnInfo(name = "time")

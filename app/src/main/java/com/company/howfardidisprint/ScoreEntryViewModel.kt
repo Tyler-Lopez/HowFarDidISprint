@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
 class ScoreEntryViewModel(application: Application): AndroidViewModel(application) {
-    private val readAllData: LiveData<List<ScoreEntry>>
+    val readAllData: LiveData<List<ScoreEntry>>
     private val repository: ScoreEntryRepository
 
     init {
@@ -21,7 +21,16 @@ class ScoreEntryViewModel(application: Application): AndroidViewModel(applicatio
             repository.addScore(score)
         }
     }
-
-    fun getData(): List<ScoreEntry> = readAllData.value ?: listOf<ScoreEntry>()
 }
 
+class ScoreEntryViewModelFactory(
+    private val application: Application
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        if (modelClass.isAssignableFrom(ScoreEntryViewModel::class.java)) {
+            return ScoreEntryViewModel(application) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
