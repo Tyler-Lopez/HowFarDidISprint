@@ -12,7 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HowFarDidISprint">
         <!--// Once we create a service, we need to register that in android manifest file using <service> element like as shown below. -->
-        <service android:name=".LocationTrackingService" />
+        <service
+            android:name=".LocationTrackingService"
+            android:exported="true"
+            />
         <activity
             android:name=".MainActivity"
             android:exported="true"

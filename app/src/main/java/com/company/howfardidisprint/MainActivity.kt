@@ -1,47 +1,66 @@
 package com.company.howfardidisprint
 
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Canvas
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.RunCircle
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ApplicationProvider
+import com.company.howfardidisprint.presentation.components.*
 import com.company.howfardidisprint.ui.theme.HowFarDidISprintTheme
 import com.company.howfardidisprint.ui.theme.roboto
 import com.google.android.gms.location.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class MainActivity : ComponentActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         setContent {
             HowFarDidISprintTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = Color(239, 240, 242)) {
+
+                 //   var leaderBoards by rememberSaveable {
+                 //   }
+                    val context = LocalContext.current
+                    val scoreEntryViewModel = ScoreEntryViewModel(this.application)
                     var leaderBoards by rememberSaveable {
-                        mutableStateOf(mutableListOf<ScoreEntry>())
+                        mutableStateOf(scoreEntryViewModel.getData())
                     }
                     var distance by rememberSaveable {
                         mutableStateOf(DistanceTracker.totalDistance)
@@ -51,6 +70,9 @@ class MainActivity : ComponentActivity() {
                     }
                     var speed by rememberSaveable {
                         mutableStateOf(DistanceTracker.latestSpeed)
+                    }
+                    var running by rememberSaveable {
+                        mutableStateOf(TrackingData.isTracking)
                     }
                     // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
                     LaunchedEffect(key1 = time) {
@@ -62,237 +84,125 @@ class MainActivity : ComponentActivity() {
                                 DistanceTracker.totalDistance // Update distance with latest speed
                             delay(1000L) // Wait one second
                             time = timeSinceStart()
-                        } else {
-                            // This would occur if we have reached over > 400 meters
+                            running = TrackingData.isTracking
+                        } else {    // This would occur if we have reached over > 400 meters
+                            if (distance >= 400) { // This check ensure we didn't abort for some other reason
+                                scoreEntryViewModel.insertScore(
+                                    ScoreEntry(
+                                        time,
+                                        dateToTimestamp(Calendar.getInstance().time) ?: 0L
+                                    )
+                                )
+                                leaderBoards = scoreEntryViewModel.getData()
+                            }
                             stopTracking()
+                            running = false
                         }
                     }
-
-                    Column(
+                    Scaffold(
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Top
-                    ) {
+                        topBar = {
+                            TopAppBar(title = {
+                                Text(
+                                    text = "SprintLogger",
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }, backgroundColor = Color.White,
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = {
 
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 20.dp),
-                            elevation = 3.dp
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                verticalAlignment = Alignment.Bottom,
-                                horizontalArrangement = Arrangement.Center
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.RunCircle,
+                                            contentDescription = "",
+                                            tint = Color(
+                                                250, 82, 7
+                                            )
+                                        )
+                                    }
+                                })
+                        },
+                        content = {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Top
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.End
+
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 20.dp),
+                                    elevation = 3.dp,
+                                    shape = RectangleShape
                                 ) {
-                                    Row(
+                                    Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 1.dp)
-                                            .background(Color(240, 241, 243))
-                                            .border(1.dp, Color(229, 224, 221))
-                                            .padding(10.dp)
-                                            .height(60.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.End
+                                            .padding(vertical = 20.dp)
                                     ) {
-                                        Text(
-                                            text = "Speed ",
-                                            fontSize = 40.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(0, 0, 0),
-                                        )
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 1.dp)
-                                            .background(Color(240, 241, 243))
-                                            .border(1.dp, Color(229, 224, 221))
-                                            .padding(10.dp)
-                                            .height(60.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.End
-                                    ) {
-                                        Text(
-                                            text = "Meters ",
-                                            fontSize = 40.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(0, 0, 0),
-                                        )
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 1.dp)
-                                            .background(Color(240, 241, 243))
-                                            .border(1.dp, Color(229, 224, 221))
-                                            .padding(10.dp)
-                                            .height(60.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.End
-                                    ) {
-                                        Text(
-                                            text = "Time ",
-                                            fontSize = 40.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(0, 0, 0),
-                                        )
-                                    }
-                                }
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                            .height(60.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Start
-                                    ) {
-                                        Text(
-                                            text = "%.2f".format(speed),
-                                            fontSize = 30.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(20, 20, 20),
-                                        )
-                                        Text(
-                                            text = " m/s",
-                                            fontSize = 15.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(40, 40, 40),
-                                        )
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                            .height(60.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Start
-                                    ) {
-                                        Text(
-                                            text = distance.toString(),
-                                            fontSize = 30.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(20, 20, 20),
-                                        )
-                                        Text(
-                                            text = " m",
-                                            fontSize = 15.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(40, 40, 40),
-                                        )
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                            .height(60.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Start
-                                    ) {
-                                        Text(
-                                            text = if (time == -1) "0" else time.toString(),
-                                            fontSize = 30.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(20, 20, 20),
-                                        )
-                                        Text(
-                                            text = " s",
-                                            fontSize = 15.sp,
-                                            fontFamily = roboto,
-                                            fontWeight = FontWeight.Normal,
-                                            textAlign = TextAlign.Center,
-                                            color = Color(40, 40, 40),
-                                        )
+                                        SubHeader("400 METER SPRINT")
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 10.dp),
+                                            verticalAlignment = Alignment.Bottom,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.End
+                                            ) {
+                                                FieldTitle(text = "Speed")
+                                                FieldTitle(text = "Meters")
+                                                FieldTitle(text = "Time")
+                                            }
+                                            Column(
+                                                modifier = Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                FieldValue("%.2f".format(speed), "m/s")
+                                                FieldValue(distance.toString(), "m")
+                                                FieldValue(
+                                                    if (time == -1) "0" else time.toString(),
+                                                    "s"
+                                                )
+                                            }
+                                        }
+                                        OrangeButton(value = if (!running) "Start" else "Stop") {
+                                            if (!TrackingData.isTracking) {
+                                                TrackingData.trackingStartedOn =
+                                                    System.currentTimeMillis()
+                                                startService(LocationTrackingService.getIntent(this@MainActivity))
+                                                TrackingData.isTracking = true
+                                                running = true
+                                                time = timeSinceStart()
+                                            }
+                                        }
+                                        WhiteButton("View Sprint History") {
+                                        }
+                                        // This is a temporary debug tool to see if persisting data can work
+                                        LazyColumn() {
+                                            items(leaderBoards.size) {
+                                                for (score in leaderBoards) {
+                                                    Text(
+                                                        text = " ${score.time} ${fromTimestamp(score.date)}",
+                                                        fontSize = 15.sp,
+                                                        fontFamily = roboto,
+                                                        fontWeight = FontWeight.Normal,
+                                                        textAlign = TextAlign.Center,
+                                                        color = Color(40, 40, 40)
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-
-                        Button(
-                            modifier = Modifier
-                                .height(100.dp)
-                                .width(350.dp)
-                                .padding(vertical = 10.dp),
-                            onClick = {
-                                if (!TrackingData.isTracking) {
-                                    TrackingData.trackingStartedOn = System.currentTimeMillis()
-                                    startService(LocationTrackingService.getIntent(this@MainActivity))
-                                    TrackingData.isTracking = true
-                                    time = timeSinceStart()
-                                }
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color(
-                                    250, 82, 7
-                                )
-                            )
-                        ) {
-
-                                Text(
-                                    text = if (!TrackingData.isTracking) "Start" else "Stop",
-                                    fontSize = 30.sp,
-                                    fontFamily = roboto,
-                                    fontWeight = FontWeight.Normal,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(255, 255, 255),
-                                )
-                        }
-
-
-                        Button(
-
-                            onClick = {
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier
-                                .height(100.dp)
-                                .width(350.dp)
-                           //     .border(2.dp, Color(250, 82, 7), shape = RoundedCornerShape(10.dp))
-                                .padding(vertical = 10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color(
-                                    255, 255, 255
-                                )
-                            )
-                        ) {
-                                Text(
-                                    text = "View Sprint History",
-                                    fontSize = 30.sp,
-                                    fontFamily = roboto,
-                                    fontWeight = FontWeight.Normal,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(250, 82, 7),
-                                )
-                        }
-                    }
+                    )
                 }
             }
         }
@@ -324,4 +234,6 @@ class MainActivity : ComponentActivity() {
         refreshSingleton()
     }
 }
+
+
 
