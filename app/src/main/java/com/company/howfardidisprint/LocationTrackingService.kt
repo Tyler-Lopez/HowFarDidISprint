@@ -18,6 +18,7 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.company.howfardidisprint.TrackingData.lastLocation
 import com.google.android.gms.location.*
 
 class LocationTrackingService : Service() {
@@ -26,9 +27,6 @@ class LocationTrackingService : Service() {
 
     private lateinit var locationCallback: LocationCallback
     private lateinit var fusedClient: FusedLocationProviderClient
-
-    private var lastLocation: Location? = null
-
     private val actionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.extras?.getString(ACTION_NAME)) {
@@ -42,7 +40,7 @@ class LocationTrackingService : Service() {
         private const val GPS_ACTION = "GPS_ACTION"
         private const val ACTION_NAME = "ACTION_NAME"
 
-        const val ACTION_START_TRACKING = "ACTION_START_TRACKING"
+        const val ACTION_START_TRACKING = "ACTION_START_TRACKING" // Is this necessary?
         const val ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING"
 
         fun getIntent(context: Context) = Intent(context, LocationTrackingService::class.java)
@@ -64,17 +62,12 @@ class LocationTrackingService : Service() {
     }
 
     private fun stopTrackingService(){
-
         stopForeground(true)
-
         stopLocationTracking()
-
         stopSelf(startId)
-
     }
 
     override fun onDestroy() {
-        lastLocation = null
         kotlin.runCatching { unregisterReceiver(actionReceiver) }
         super.onDestroy()
     }
@@ -85,24 +78,14 @@ class LocationTrackingService : Service() {
         // Reset distance and last location location
         DistanceTracker.totalDistance = 0L
         DistanceTracker.latestSpeed = 0f
-        lastLocation = null
+
 
         val locationRequest = LocationRequest().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             interval = 2000
-            smallestDisplacement = 2.0F
+            smallestDisplacement = 15.0F
         }
 
-        // initialize locationo setting request builder object
-   //     val builder = LocationSettingsRequest.Builder()
-    //    builder.addLocationRequest(locationRequest!!)
-   //     val locationSettingsRequest = builder.build()
-
-        // initialize location service object
-      //  val settingsClient = LocationServices.getSettingsClient(this)
-      //  settingsClient!!.checkLocationSettings(locationSettingsRequest)
-
-        // call register location listner
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(result: LocationResult?) {
                 result?.let {
@@ -157,6 +140,4 @@ class LocationTrackingService : Service() {
         service.createNotificationChannel(chan)
         return channelId
     }
-
-
 }

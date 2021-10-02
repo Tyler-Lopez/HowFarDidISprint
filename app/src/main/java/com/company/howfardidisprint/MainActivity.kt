@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.company.howfardidisprint.ui.theme.HowFarDidISprintTheme
+import com.company.howfardidisprint.ui.theme.roboto
 import com.google.android.gms.location.*
 import kotlinx.coroutines.delay
 
@@ -36,241 +39,258 @@ class MainActivity : ComponentActivity() {
         setContent {
             HowFarDidISprintTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(color = Color(31, 0, 171, 255)) {
+                Surface(color = Color(239, 240, 242)) {
                     var leaderBoards by rememberSaveable {
                         mutableStateOf(mutableListOf<ScoreEntry>())
                     }
                     var distance by rememberSaveable {
                         mutableStateOf(DistanceTracker.totalDistance)
                     }
-                    var running by rememberSaveable {
-                        mutableStateOf(TrackingData.isTracking)
-                    }
                     var time by rememberSaveable {
-                        mutableStateOf(TrackingData.timeTracked)
+                        mutableStateOf(-1)
                     }
                     var speed by rememberSaveable {
                         mutableStateOf(DistanceTracker.latestSpeed)
                     }
+                    // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
                     LaunchedEffect(key1 = time) {
-                        if (running && time != 0) {
-                            running = TrackingData.isTracking
-                            speed = DistanceTracker.latestSpeed
-                            distance = DistanceTracker.totalDistance
-                            delay(1000L)
-                            TrackingData.timeTracked++
-                            time = TrackingData.timeTracked
-                        } else if (time > 0) {
-                            leaderBoards.add(ScoreEntry(time)) // Add the amount of meters to leaderboard
-                            LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
-                            stopService(LocationTrackingService.getIntent(this@MainActivity))
-                        } else if (time != 0) {
-                            running = TrackingData.isTracking
-                            delay(1000L)
-                            TrackingData.timeTracked++
-                            time = TrackingData.timeTracked
+                        // If the running flag is still true
+                        if (TrackingData.isTracking) {
+                            speed =
+                                DistanceTracker.latestSpeed // Update speed variable with latest speed
+                            distance =
+                                DistanceTracker.totalDistance // Update distance with latest speed
+                            delay(1000L) // Wait one second
+                            time = timeSinceStart()
+                        } else {
+                            // This would occur if we have reached over > 400 meters
+                            stopTracking()
                         }
                     }
 
-                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                        val maxHeight = this.maxHeight
-                        val dirtStart = this.maxHeight / 3
-                        // Canvas containing artwork for backdrop
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            for (i in 0..60) {
-                                drawRect(
-                                    color =
-                                    if (i % 2 == 0)
-                                        Color(101, 184, 67)
-                                    else
-                                        Color(42, 111, 23),
-                                    size = Size(25.dp.toPx(), 40.dp.toPx()),
-                                    topLeft = Offset(
-                                        i * 25.dp.toPx(),
-                                        maxHeight.toPx() - dirtStart.toPx() - 30.dp.toPx()
-                                    )
-                                )
-                                drawRect(
-                                    color =
-                                    if (i % 2 == 0)
-                                        Color(101, 184, 67)
-                                    else
-                                        Color(42, 111, 23),
-                                    size = Size(5.dp.toPx(), 50.dp.toPx()),
-                                    topLeft = Offset(
-                                        (i * 25).dp.toPx() - 25.dp.toPx(),
-                                        maxHeight.toPx() - dirtStart.toPx() - 30.dp.toPx()
-                                    )
-                                )
-                                for (j in 0..30) {
-                                    drawRect(
-                                        color =
-                                        when (j % 2 == 0) {
-                                            true -> {
-                                                if (i % 2 == 0)
-                                                    Color(192, 111, 29)
-                                                else
-                                                    Color(133, 67, 15)
-                                            }
-                                            false -> {
-                                                if (i % 2 != 0)
-                                                    Color(192, 111, 29)
-                                                else
-                                                    Color(133, 67, 15)
-                                            }
-                                        },
-                                        size = Size(20.dp.toPx(), 20.dp.toPx()),
-                                        topLeft = Offset(
-                                            i * 20.dp.toPx(),
-                                            maxHeight.toPx() - dirtStart.toPx() + j * 20.dp.toPx()
-                                        )
-                                    )
-                                }
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
 
-                            }
-                        }
-
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Top
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 20.dp),
+                            elevation = 3.dp
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
+                                    .padding(10.dp),
+                                verticalAlignment = Alignment.Bottom,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Text(
-                                    text = "SPEED  ",
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(230, 209, 27),
-                                )
-                                Text(
-                                    text = "%.2f".format(speed),
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(255, 255, 255),
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "METERS  ",
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(230, 209, 27),
-                                )
-                                Text(
-                                    text = "${distance}",
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(255, 255, 255),
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .padding(bottom = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "TIME  ",
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(230, 209, 27),
-                                )
-                                Text(
-                                    text = "$time",
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    color = Color(255, 255, 255),
-                                )
-                            }
-                            Button(
-                                modifier = Modifier
-                                    .shadow(20.dp)
-                                    .height(100.dp)
-                                    .width(250.dp),
-                                onClick = {
-                                    if (!running) {
-                                        startService(LocationTrackingService.getIntent(this@MainActivity))
-                                        TrackingData.isTracking = true
-                                        TrackingData.timeTracked = 0
-                                        running = TrackingData.isTracking
-                                        time = -1
-                                    }
-                                },
-                                shape = RoundedCornerShape(20.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = Color(
-                                        185,
-                                        52,
-                                        53
-                                    )
-                                )
-                            ) {
-                                Card(
-                                    modifier = Modifier.fillMaxSize(),
-                                    shape = RoundedCornerShape(20.dp),
-                                    backgroundColor = Color(2, 82, 155),
-                                    elevation = 10.dp
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalAlignment = Alignment.End
                                 ) {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 1.dp)
+                                            .background(Color(240, 241, 243))
+                                            .border(1.dp, Color(229, 224, 221))
+                                            .padding(10.dp)
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
                                     ) {
                                         Text(
-                                            text = if (!running) "START!" else "GO FAST!",
+                                            text = "Speed ",
                                             fontSize = 40.sp,
-                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
                                             textAlign = TextAlign.Center,
-                                            color = Color(230, 209, 27),
+                                            color = Color(0, 0, 0),
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 1.dp)
+                                            .background(Color(240, 241, 243))
+                                            .border(1.dp, Color(229, 224, 221))
+                                            .padding(10.dp)
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Text(
+                                            text = "Meters ",
+                                            fontSize = 40.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(0, 0, 0),
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 1.dp)
+                                            .background(Color(240, 241, 243))
+                                            .border(1.dp, Color(229, 224, 221))
+                                            .padding(10.dp)
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Text(
+                                            text = "Time ",
+                                            fontSize = 40.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(0, 0, 0),
+                                        )
+                                    }
+                                }
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Text(
+                                            text = "%.2f".format(speed),
+                                            fontSize = 30.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(20, 20, 20),
+                                        )
+                                        Text(
+                                            text = " m/s",
+                                            fontSize = 15.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(40, 40, 40),
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Text(
+                                            text = distance.toString(),
+                                            fontSize = 30.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(20, 20, 20),
+                                        )
+                                        Text(
+                                            text = " m",
+                                            fontSize = 15.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(40, 40, 40),
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)
+                                            .height(60.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Text(
+                                            text = if (time == -1) "0" else time.toString(),
+                                            fontSize = 30.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(20, 20, 20),
+                                        )
+                                        Text(
+                                            text = " s",
+                                            fontSize = 15.sp,
+                                            fontFamily = roboto,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                            color = Color(40, 40, 40),
                                         )
                                     }
                                 }
                             }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .padding(bottom = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    for (score in leaderBoards) {
-                                        Card(modifier = Modifier.width(200.dp).padding(top = 5.dp)) {
-                                            Text(
-                                                text = "${score.meters}",
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                textAlign = TextAlign.Center,
-                                                color = Color.DarkGray,
-                                            )
-                                        }
-                                    }
-                                }
+                        }
 
-                            }
+                        Button(
+                            modifier = Modifier
+                                .height(100.dp)
+                                .width(350.dp)
+                                .padding(vertical = 10.dp),
+                            onClick = {
+                                if (!TrackingData.isTracking) {
+                                    TrackingData.trackingStartedOn = System.currentTimeMillis()
+                                    startService(LocationTrackingService.getIntent(this@MainActivity))
+                                    TrackingData.isTracking = true
+                                    time = timeSinceStart()
+                                }
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color(
+                                    250, 82, 7
+                                )
+                            )
+                        ) {
+
+                                Text(
+                                    text = if (!TrackingData.isTracking) "Start" else "Stop",
+                                    fontSize = 30.sp,
+                                    fontFamily = roboto,
+                                    fontWeight = FontWeight.Normal,
+                                    textAlign = TextAlign.Center,
+                                    color = Color(255, 255, 255),
+                                )
+                        }
+
+
+                        Button(
+
+                            onClick = {
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier
+                                .height(100.dp)
+                                .width(350.dp)
+                           //     .border(2.dp, Color(250, 82, 7), shape = RoundedCornerShape(10.dp))
+                                .padding(vertical = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color(
+                                    255, 255, 255
+                                )
+                            )
+                        ) {
+                                Text(
+                                    text = "View Sprint History",
+                                    fontSize = 30.sp,
+                                    fontFamily = roboto,
+                                    fontWeight = FontWeight.Normal,
+                                    textAlign = TextAlign.Center,
+                                    color = Color(250, 82, 7),
+                                )
                         }
                     }
                 }
@@ -278,40 +298,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // If the app is paused, stop the service and reset
+    // Is it necessary to call all three here?
     override fun onPause() {
         // https://stackoverflow.com/questions/10971284/detect-activity-being-paused-due-to-configuration-change
-        if (!isChangingConfigurations) {
-            DistanceTracker.totalDistance = 0L
-            TrackingData.isTracking = false
-            TrackingData.timeTracked = 0
-            LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
-            stopService(LocationTrackingService.getIntent(this@MainActivity))
-        }
+        if (!isChangingConfigurations)
+            stopTracking()
         super.onPause()
     }
+
+    override fun onStop() {
+        if (!isChangingConfigurations)
+            stopTracking()
+        super.onStop()
+    }
+
     override fun onDestroy() {
+        if (!isChangingConfigurations)
+            stopTracking()
         super.onDestroy()
-        if (!isChangingConfigurations) {
-            DistanceTracker.totalDistance = 0L
-            TrackingData.isTracking = false
-            TrackingData.timeTracked = 0
-            LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
-            stopService(LocationTrackingService.getIntent(this@MainActivity))
-        }
+    }
+
+    fun stopTracking() {
+        LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
+        stopService(LocationTrackingService.getIntent(this@MainActivity))
+        refreshSingleton()
     }
 }
 
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    HowFarDidISprintTheme {
-        Greeting("Android")
-    }
-}
