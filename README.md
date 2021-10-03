@@ -13,7 +13,7 @@ Data is persisted, so users may review their historical sprints. By default, the
 * Persistent top navigation bar
 * Use of Google Locations API
 * Utilization of Room persistence library
-* Permission request
+* Single permission request
 
 ## UI Examples
 <p align="center">
