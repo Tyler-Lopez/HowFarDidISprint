@@ -6,7 +6,7 @@ This Android application in-development will allow the user to track their faste
 
 In the featured picture, the user has just walked 405 meters in 238 seconds with their last location data reporting a speed of 1.64 meters per second.
 
-Data is persisted, so users may review their historial sprints. By default, the "Sprint History" is sorted ascending by seconds it took them to run 400 meters.
+Data is persisted, so users may review their historical sprints. By default, the "Sprint History" is sorted ascending by seconds it took them to run 400 meters.
 
 ## Features
 * Use of AnimatedNavHost navController, MVVM and clean architecture
