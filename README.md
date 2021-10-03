@@ -1,7 +1,6 @@
-<img src="https://user-images.githubusercontent.com/77797048/135735284-01f5575f-918d-42f3-8d66-b5949f4435f5.png" width="300px">
+<p align="center"><img src="https://user-images.githubusercontent.com/77797048/135735284-01f5575f-918d-42f3-8d66-b5949f4435f5.png" width="300px"></p>
 
-
-## About
+# About
      
 This Android application in-development will allow the user to track their fastest 400 m sprint times day-to-day. This application serves as a personal exploration in both working with the Android Locations API and in persisting user data with Room. The user should open the app, click "Start", then simply run 400 meters. Throughout the run, their current distance, speed, and the amount of seconds which have yet elapsed will be displayed. If the user has not yet sprinted once today, they are encouraged to do so.
 
