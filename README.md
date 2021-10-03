@@ -8,6 +8,12 @@ In the featured picture, the user has just walked 405 meters in 238 seconds with
 
 Data is persisted, so users may review their historial sprints. By default, the "Sprint History" is sorted ascending by seconds it took them to run 400 meters.
 
-## User Interface(UI)
+## Features
+* Use of AnimatedNavHost navController, MVVM and clean architecture
+* Persistent top navigation bar
+* Use of Google Locations API
+* Utilization of Room persistence library
+
+## UI Examples
 <img src="https://user-images.githubusercontent.com/77797048/135735287-ae45b395-aa19-4f79-9db1-f12d2b810757.png" width="300px">
 <img src="https://user-images.githubusercontent.com/77797048/135735290-f2528b83-2b37-4f5f-bdae-4bcc30060bd3.png" width="300px">
