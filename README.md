@@ -8,6 +8,12 @@ In the featured picture, the user has just walked 405 meters in 238 seconds with
 
 Data is persisted, so users may review their historical sprints. By default, the "Sprint History" is sorted ascending by seconds it took them to run 400 meters.
 
+## To-Do
+* The application must not be paused in anyway while recording data or it will cease to record data. This was a quick fix for another issue which must be resolved in future.
+* Add other sprint distances?
+* Rebrand to "Mile a day", "Run a day", introduce more streak-based features?
+* Publish on PlayStore
+
 ## Features
 * Use of AnimatedNavHost navController, MVVM and clean architecture
 * Persistent top navigation bar
