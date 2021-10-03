@@ -24,7 +24,7 @@ fun FieldTitle(text: String) {
             .padding(vertical = 1.dp)
             .background(Color(240, 241, 243))
             .border(1.dp, Color(229, 224, 221))
-            .padding(10.dp)
+            .padding(horizontal = 10.dp)
             .height(60.dp),
         contentAlignment = Alignment.CenterEnd
     ) {

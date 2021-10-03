@@ -24,11 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.company.howfardidisprint.presentation.components.*
 import com.company.howfardidisprint.ui.theme.HowFarDidISprintTheme
 import com.company.howfardidisprint.ui.theme.roboto
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.*
 import kotlinx.coroutines.delay
 import java.util.*
@@ -36,6 +38,7 @@ import java.util.*
 class MainActivity : ComponentActivity() {
 
 
+    @ExperimentalPermissionsApi
     @ExperimentalMaterialApi
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,6 +125,5 @@ class MainActivity : ComponentActivity() {
         refreshSingleton()
     }
 }
-
 
 

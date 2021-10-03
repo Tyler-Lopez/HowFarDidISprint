@@ -21,7 +21,7 @@ fun FieldValue(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
-            .padding(10.dp)
+            .padding(horizontal = 10.dp)
             .height(60.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start

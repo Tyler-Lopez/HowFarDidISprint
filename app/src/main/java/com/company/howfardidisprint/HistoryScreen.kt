@@ -26,80 +26,86 @@ import com.company.howfardidisprint.ui.theme.roboto
 @Composable
 fun HistoryScreen(navController: NavController) {
     //  val state = viewModel.state.value
-    Surface(color = Color(240, 241, 243)) {
-        val context = LocalContext.current
-        val mScoreEntryViewModel: ScoreEntryViewModel = viewModel(
-            factory = ScoreEntryViewModelFactory(context.applicationContext as Application)
-        )
-        var leaderBoards =
-            mScoreEntryViewModel.readAllData.observeAsState(listOf()).value
+    val context = LocalContext.current
+    val mScoreEntryViewModel: ScoreEntryViewModel = viewModel(
+        factory = ScoreEntryViewModelFactory(context.applicationContext as Application)
+    )
+    var leaderBoards =
+        mScoreEntryViewModel.readAllData.observeAsState(listOf()).value
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp)
+    ) {
+        SubHeader("400 METER SPRINT HISTORY")
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            SubHeader("400 METER SPRINT HISTORY")
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                items(leaderBoards.size) {
-                    val score = leaderBoards?.get(it)
-                    val dateOfRun = millisecondsToLocalDateTime(score.date)
-                    val day = dateOfRun.dayOfMonth
-                    val month = dateOfRun.monthValue
-                    val year = dateOfRun.year
-                    Card(
+            items(leaderBoards.size) {
+                val score = leaderBoards?.get(it)
+                val dateOfRun = millisecondsToLocalDateTime(score.date)
+                val day = dateOfRun.dayOfMonth
+                val month = dateOfRun.monthValue
+                val year = dateOfRun.year
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 5.dp),
+                    elevation = 2.dp,
+                    shape = RectangleShape
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 5.dp),
-                        elevation = 2.dp,
-                        shape = RectangleShape
+                            .padding(horizontal = 20.dp),
+                        Arrangement.SpaceAround
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                            Arrangement.SpaceAround
+                            modifier = Modifier.weight(1f),
+                            Arrangement.Center,
+                            Alignment.CenterVertically
                         ) {
-                            Row(modifier = Modifier.weight(1f), Arrangement.Center, Alignment.CenterVertically) {
-                                Text(
-                                    text = score.time.toString(),
-                                    style = TextStyle(
-                                        color = Color(80, 80, 80),
-                                        fontSize = 20.sp,
-                                        fontFamily = roboto,
-                                        letterSpacing = 0.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center,
-                                    ),
-                                    modifier = Modifier.padding(vertical = 10.dp)
-                                )
-                                Text(
-                                    text = " s",
-                                    style = TextStyle(
-                                        color = Color(80, 80, 80),
-                                        fontSize = 15.sp,
-                                        fontFamily = roboto,
-                                        letterSpacing = 0.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        textAlign = TextAlign.Center,
-                                    ),
-                                )
-                            }
                             Text(
-                                text = "$day-$month-$year",
+                                text = score.time.toString(),
                                 style = TextStyle(
                                     color = Color(80, 80, 80),
                                     fontSize = 20.sp,
                                     fontFamily = roboto,
                                     letterSpacing = 0.sp,
-                                    fontWeight = FontWeight.Light,
+                                    fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
                                 ),
-                                modifier = Modifier.padding(vertical = 10.dp).weight(1f)
+                                modifier = Modifier.padding(vertical = 10.dp)
+                            )
+                            Text(
+                                text = " s",
+                                style = TextStyle(
+                                    color = Color(80, 80, 80),
+                                    fontSize = 15.sp,
+                                    fontFamily = roboto,
+                                    letterSpacing = 0.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
+                                ),
                             )
                         }
+                        Text(
+                            text = "$day-$month-$year",
+                            style = TextStyle(
+                                color = Color(80, 80, 80),
+                                fontSize = 20.sp,
+                                fontFamily = roboto,
+                                letterSpacing = 0.sp,
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center,
+                            ),
+                            modifier = Modifier
+                                .padding(vertical = 10.dp)
+                                .weight(1f)
+                        )
                     }
                 }
             }
