@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // https://www.youtube.com/watch?v=vsDkhRTMdA0 @4:47
-@Database(entities = [Run::class], version = 1, exportSchema = false)
+@Database(entities = [Run::class], version = 2, exportSchema = false)
 abstract class RunDatabase : RoomDatabase() {
 
     // Abstract because Room generates the implementation

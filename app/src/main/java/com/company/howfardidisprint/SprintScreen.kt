@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.company.howfardidisprint.model.*
 import com.company.howfardidisprint.presentation.components.*
 import com.company.howfardidisprint.ui.theme.roboto
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -43,16 +44,21 @@ fun SprintScreen(
     navController: NavController,
     startTracking: () -> Unit,
     stopTracking: () -> Unit,
+    runDistance: RunDistance = RunDistance.QUARTERMILE,
 ) {
     val context = LocalContext.current
-    val mScoreEntryViewModel: ScoreEntryViewModel = viewModel(
-        factory = ScoreEntryViewModelFactory(context.applicationContext as Application)
+    val mRunViewModel: RunViewModel = viewModel(
+        factory = RunViewModelFactory(context.applicationContext as Application)
     )
-    var leaderBoards = mScoreEntryViewModel.readAllData.observeAsState(listOf()).value
+    mRunViewModel.filterDistance(runDistance, SortType.BY_DATE)
+    var leaderBoards = mRunViewModel.data.observeAsState(listOf()).value
+
 
     // This is kind of a hacky, bad solution to ensuring this is updated after the user runs
     var hasRunToday by remember { mutableStateOf(false) }
-    LaunchedEffect(key1 = leaderBoards.size) { hasRunToday = hasRunToday(leaderBoards) }
+    LaunchedEffect(key1 = leaderBoards.size) {
+        hasRunToday = hasRunToday(leaderBoards)
+    }
 
     var distance by rememberSaveable { mutableStateOf(DistanceTracker.totalDistance) }
     var time by rememberSaveable { mutableStateOf(-1) }
@@ -85,10 +91,11 @@ fun SprintScreen(
         } else { // This would occur if we have reached over > 400 meters
             distance = DistanceTracker.totalDistance
             if (distance >= 400) {
-                mScoreEntryViewModel.insertScore(
-                    ScoreEntry(
-                        time,
-                        dateToTimestamp(Calendar.getInstance().time) ?: 0L
+                mRunViewModel.insertRun(
+                    Run(
+                        startTime = dateToTimestamp(Calendar.getInstance().time) ?: 0L,
+                        totalTime = time,
+                        distance = runDistance
                     )
                 )
             }
@@ -115,7 +122,7 @@ fun SprintScreen(
                     .fillMaxWidth()
                     .padding(vertical = 20.dp)
             ) {
-                SubHeader("400 METER SPRINT")
+                SubHeader("$runDistance")
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -201,7 +208,7 @@ fun SprintScreen(
                             time = timeSinceStart()
                         }
                     }
-                    WhiteButton("View Sprint History") {
+                    WhiteButton("View $runDistance History") {
                         stopTracking()
                         navController.navigate(Screen.HistoryScreen.route)
                     }
@@ -211,9 +218,9 @@ fun SprintScreen(
         }
         FullWidthCard(
             string = if (hasRunToday)
-                "You've sprinted today, great job!"
+                "You've run today, great job!"
             else
-                "You haven't sprinted yet today!"
+                "You haven't run yet today!"
         )
     }
 }

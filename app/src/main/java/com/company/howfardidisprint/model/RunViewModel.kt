@@ -36,8 +36,8 @@ class RunViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        if (modelClass.isAssignableFrom(ScoreEntryViewModel::class.java)) {
-            return ScoreEntryViewModel(application) as T
+        if (modelClass.isAssignableFrom(RunViewModel::class.java)) {
+            return RunViewModel(application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

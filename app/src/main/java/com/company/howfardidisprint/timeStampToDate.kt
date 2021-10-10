@@ -2,6 +2,7 @@ package com.company.howfardidisprint
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.company.howfardidisprint.model.Run
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -28,10 +29,11 @@ fun millisecondsToLocalDateTime(milliseconds: Long): LocalDateTime {
     return Instant.ofEpochMilli(milliseconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
 }
 
-fun hasRunToday(scores: List<ScoreEntry>): Boolean {
-    if (scores.isNullOrEmpty()) return false
-    val score = scores.first()
-    val dateOfRun = millisecondsToLocalDateTime(score.date)
+fun hasRunToday(run: List<Run>): Boolean {
+    if (run.isEmpty())
+        return false
+
+    val dateOfRun = millisecondsToLocalDateTime(run.first().startTime)
     val day = dateOfRun.dayOfMonth
     val today = LocalDateTime.now().dayOfMonth
     println("HERE $dateOfRun // $day // $today")

@@ -20,7 +20,7 @@ fun SubHeader(text: String) {
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Start,
         modifier = Modifier.padding(
-            horizontal = 10.dp,
+            horizontal = 20.dp,
             vertical = 5.dp
         ),
         color = Color(75, 70, 70),

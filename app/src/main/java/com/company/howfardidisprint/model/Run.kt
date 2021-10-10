@@ -10,10 +10,8 @@ data class Run(
     @PrimaryKey
     @ColumnInfo(name = "start")
     val startTime: Long, // Local time user started run
-    @PrimaryKey
     @ColumnInfo(name = "time")
-    val totalTime: Long, // Seconds
-    @PrimaryKey
+    val totalTime: Int, // Seconds
     @ColumnInfo(name = "distance")
     val distance: RunDistance //
 )

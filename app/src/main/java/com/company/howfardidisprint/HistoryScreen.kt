@@ -20,93 +20,116 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.company.howfardidisprint.model.RunDistance
+import com.company.howfardidisprint.model.RunViewModel
+import com.company.howfardidisprint.model.RunViewModelFactory
+import com.company.howfardidisprint.model.SortType
 import com.company.howfardidisprint.presentation.components.*
 import com.company.howfardidisprint.ui.theme.roboto
 
 @Composable
-fun HistoryScreen(navController: NavController) {
-    //  val state = viewModel.state.value
+fun HistoryScreen(
+    navController: NavController,
+    runDistance: RunDistance = RunDistance.QUARTERMILE,
+) {
     val context = LocalContext.current
-    val mScoreEntryViewModel: ScoreEntryViewModel = viewModel(
-        factory = ScoreEntryViewModelFactory(context.applicationContext as Application)
+    val mRunViewModel: RunViewModel = viewModel(
+        factory = RunViewModelFactory(context.applicationContext as Application)
     )
-    var leaderBoards =
-        mScoreEntryViewModel.readAllData.observeAsState(listOf()).value
+
+    mRunViewModel.filterDistance(runDistance, SortType.BY_DATE)
+
+    var leaderBoards = mRunViewModel.data.observeAsState(listOf()).value
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 20.dp)
     ) {
-        SubHeader("400 METER SPRINT HISTORY")
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            items(leaderBoards.size) {
-                val score = leaderBoards?.get(it)
-                val dateOfRun = millisecondsToLocalDateTime(score.date)
-                val day = dateOfRun.dayOfMonth
-                val month = dateOfRun.monthValue
-                val year = dateOfRun.year
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp),
-                    elevation = 2.dp,
-                    shape = RectangleShape
-                ) {
-                    Row(
+        SubHeader("${runDistance.toString().uppercase()} HISTORY")
+        if (leaderBoards.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                items(leaderBoards.size) {
+                    val run = leaderBoards?.get(it)
+                    val dateOfRun = millisecondsToLocalDateTime(run.startTime)
+                    val day = dateOfRun.dayOfMonth
+                    val month = dateOfRun.monthValue
+                    val year = dateOfRun.year
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
-                        Arrangement.SpaceAround
+                            .padding(vertical = 5.dp),
+                        elevation = 2.dp,
+                        shape = RectangleShape
                     ) {
                         Row(
-                            modifier = Modifier.weight(1f),
-                            Arrangement.Center,
-                            Alignment.CenterVertically
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            Arrangement.SpaceAround
                         ) {
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                Arrangement.Center,
+                                Alignment.CenterVertically
+                            ) {
+                                    Text(
+                                        text = "${run.totalTime}",
+                                        style = TextStyle(
+                                            color = Color(80, 80, 80),
+                                            fontSize = 20.sp,
+                                            fontFamily = roboto,
+                                            letterSpacing = 0.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                        ),
+                                        modifier = Modifier.padding(vertical = 10.dp)
+                                    )
+                                Text(
+                                    text = " s",
+                                    style = TextStyle(
+                                        color = Color(80, 80, 80),
+                                        fontSize = 15.sp,
+                                        fontFamily = roboto,
+                                        letterSpacing = 0.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                    ),
+                                )
+                            }
                             Text(
-                                text = score.time.toString(),
+                                text = "$day-$month-$year",
                                 style = TextStyle(
                                     color = Color(80, 80, 80),
                                     fontSize = 20.sp,
                                     fontFamily = roboto,
                                     letterSpacing = 0.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Light,
                                     textAlign = TextAlign.Center,
                                 ),
-                                modifier = Modifier.padding(vertical = 10.dp)
-                            )
-                            Text(
-                                text = " s",
-                                style = TextStyle(
-                                    color = Color(80, 80, 80),
-                                    fontSize = 15.sp,
-                                    fontFamily = roboto,
-                                    letterSpacing = 0.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Center,
-                                ),
+                                modifier = Modifier
+                                    .padding(vertical = 10.dp)
+                                    .weight(1f)
                             )
                         }
-                        Text(
-                            text = "$day-$month-$year",
-                            style = TextStyle(
-                                color = Color(80, 80, 80),
-                                fontSize = 20.sp,
-                                fontFamily = roboto,
-                                letterSpacing = 0.sp,
-                                fontWeight = FontWeight.Light,
-                                textAlign = TextAlign.Center,
-                            ),
-                            modifier = Modifier
-                                .padding(vertical = 10.dp)
-                                .weight(1f)
-                        )
                     }
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                Card(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+                    Text(
+                        text = "You haven't run $runDistance yet",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(20.dp))
                 }
             }
         }

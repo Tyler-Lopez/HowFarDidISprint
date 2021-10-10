@@ -50,43 +50,14 @@ class MainActivity : ComponentActivity() {
             HowFarDidISprintTheme {
 
                 // A surface container using the 'background' color from the theme
-                Scaffold(
-
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBar(title = {
-                            Text(
-                                text = "SprintLogger",
-                                fontWeight = FontWeight.Bold
-                            )
-                        }, backgroundColor = Color.White,
-                            navigationIcon = {
-                                IconButton(
-                                    onClick = {
-
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.RunCircle,
-                                        contentDescription = "",
-                                        tint = Color(
-                                            250, 82, 7
-                                        )
-                                    )
-                                }
-                            })
+                Navigation(
+                    navController = navController,
+                    startTracking = {
+                        startTracking()
                     },
-                    content = {
-                        Navigation(
-                            navController = navController,
-                            startTracking = {
-                                startTracking()
-                            },
-                            stopTracking = {
-                                stopTracking()
-                            })
-                    }
-                )
+                    stopTracking = {
+                        stopTracking()
+                    })
             }
         }
     }

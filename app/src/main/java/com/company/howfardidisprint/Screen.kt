@@ -3,6 +3,7 @@ package com.company.howfardidisprint
 sealed class Screen(val route: String) {
     object SprintScreen : Screen("sprint_screen")
     object HistoryScreen : Screen("history_screen")
+    object RunSelection : Screen("runselection_screen")
 
     // Invoked to pass string arguments(section key) to screens
     fun withArgs(vararg args: String): String {
