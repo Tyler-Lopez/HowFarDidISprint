@@ -2,7 +2,6 @@ package com.company.howfardidisprint.model
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.company.howfardidisprint.ScoreEntryViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException

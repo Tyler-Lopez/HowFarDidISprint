@@ -1,6 +1,7 @@
 package com.company.howfardidisprint.presentation.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.company.howfardidisprint.ui.theme.roboto
 
 @Composable
-fun WhiteButton(value: String, onClick: () -> Unit) {
+fun WhiteButton(value: String, onClick: () -> Unit, padding: PaddingValues) {
     Button(
         onClick = {
             onClick()
@@ -26,7 +27,7 @@ fun WhiteButton(value: String, onClick: () -> Unit) {
         shape = RoundedCornerShape(5.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, start = 10.dp, end = 10.dp)
+            .padding(padding)
             .border(
                 1.dp,
                 Color(215, 99, 58),

@@ -1,8 +1,6 @@
 package com.company.howfardidisprint.model
 
 import androidx.lifecycle.LiveData
-import com.company.howfardidisprint.ScoreEntry
-import com.company.howfardidisprint.ScoreEntryDao
 
 
 class RunRepository(private val runDao: RunDao) {

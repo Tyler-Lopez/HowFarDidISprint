@@ -43,8 +43,8 @@ fun HistoryScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp)
+            .fillMaxSize()
+            .padding(top = 10.dp)
     ) {
         SubHeader("${runDistance.toString().uppercase()} HISTORY")
         if (leaderBoards.isNotEmpty()) {
@@ -128,6 +128,7 @@ fun HistoryScreen(
                 Card(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
                     Text(
                         text = "You haven't run $runDistance yet",
+                        fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(20.dp))
                 }

@@ -46,6 +46,9 @@ fun SprintScreen(
     stopTracking: () -> Unit,
     runDistance: RunDistance = RunDistance.QUARTERMILE,
 ) {
+    // Update singleton with active run for purposes of tracking distance
+    DistanceTracker.runDistance = runDistance
+
     val context = LocalContext.current
     val mRunViewModel: RunViewModel = viewModel(
         factory = RunViewModelFactory(context.applicationContext as Application)
@@ -90,7 +93,7 @@ fun SprintScreen(
             running = TrackingData.isTracking
         } else { // This would occur if we have reached over > 400 meters
             distance = DistanceTracker.totalDistance
-            if (distance >= 400) {
+            if (distance >= DistanceTracker.runDistance.distance) {
                 mRunViewModel.insertRun(
                     Run(
                         startTime = dateToTimestamp(Calendar.getInstance().time) ?: 0L,
@@ -120,7 +123,7 @@ fun SprintScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 20.dp)
+                    .padding(vertical = 10.dp)
             ) {
                 SubHeader("$runDistance")
                 Row(
@@ -151,7 +154,9 @@ fun SprintScreen(
                     }
                     if (isLandscape) {
                         Column(
-                            modifier = Modifier.fillMaxHeight().weight(1f),
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .weight(1f),
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -177,10 +182,10 @@ fun SprintScreen(
                                     time = timeSinceStart()
                                 }
                             }
-                            WhiteButton("View Sprint History") {
+                            WhiteButton("View $runDistance History", {
                                 stopTracking()
                                 navController.navigate(Screen.HistoryScreen.route)
-                            }
+                            }, PaddingValues(10.dp))
                         }
                     }
                 }
@@ -208,20 +213,22 @@ fun SprintScreen(
                             time = timeSinceStart()
                         }
                     }
-                    WhiteButton("View $runDistance History") {
-                        stopTracking()
-                        navController.navigate(Screen.HistoryScreen.route)
-                    }
+                    WhiteButton("View $runDistance History",
+                        onClick = {
+                            stopTracking()
+                            navController.navigate(Screen.HistoryScreen.route)
+                        }, PaddingValues(10.dp)
+                    )
+                    FullWidthCard(
+                        string = if (hasRunToday)
+                            "You've run today, great job!"
+                        else
+                            "You haven't run yet today!"
+                    )
                 }
 
             }
         }
-        FullWidthCard(
-            string = if (hasRunToday)
-                "You've run today, great job!"
-            else
-                "You haven't run yet today!"
-        )
     }
 }
 

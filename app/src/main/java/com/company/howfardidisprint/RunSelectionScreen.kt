@@ -37,8 +37,8 @@ fun RunSelectionScreen(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp)
+            .fillMaxSize()
+            .padding(top = 10.dp, bottom = 60.dp)
             .verticalScroll(rememberScrollState())
     ) {
         SubHeader("Choose your distance")
@@ -73,7 +73,7 @@ fun RunSelectionScreen(
                             WhiteButton("SELECT", onClick = {
                                 onUpdateDistance(distance)
                                 navController.navigate(Screen.SprintScreen.route)
-                            })
+                            }, PaddingValues(10.dp))
                         }
                     }
             }

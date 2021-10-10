@@ -97,7 +97,7 @@ class LocationTrackingService : Service() {
                         val distanceInMeters = its_last.distanceTo(lastLocation)
                         DistanceTracker.latestSpeed = its_last.speed
                         DistanceTracker.totalDistance += distanceInMeters.toLong()
-                        if (DistanceTracker.totalDistance >= 400L) TrackingData.isTracking = false // If we're over 400 meters stop tracking!
+                        if (DistanceTracker.totalDistance >= DistanceTracker.runDistance.distance) TrackingData.isTracking = false // If we're over the necessary meters, stop tracking
                         println("TRACKER" + "Completed: ${DistanceTracker.totalDistance} meters, (added $distanceInMeters)")
                         lastLocation = its_last
                     }

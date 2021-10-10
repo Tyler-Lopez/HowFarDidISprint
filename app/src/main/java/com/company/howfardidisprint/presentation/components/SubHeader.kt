@@ -14,8 +14,8 @@ import com.company.howfardidisprint.ui.theme.roboto
 @Composable
 fun SubHeader(text: String) {
     Text(
-        text = text,
-        fontSize = 14.sp,
+        text = text.uppercase(),
+        fontSize = 18.sp,
         fontFamily = roboto,
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Start,

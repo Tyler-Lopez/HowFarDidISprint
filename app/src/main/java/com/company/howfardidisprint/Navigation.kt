@@ -1,5 +1,6 @@
 package com.company.howfardidisprint
 
+import android.provider.Settings
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -11,12 +12,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.RunCircle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.company.howfardidisprint.model.RunDistance
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -32,32 +31,15 @@ fun Navigation(
     startTracking: () -> Unit,
     stopTracking: () -> Unit
 ) {
-    var runDistance = RunDistance.MILE
+    var runDistance by rememberSaveable {
+        mutableStateOf(RunDistance.MILE)
+    }
+
     Scaffold(
 
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(title = {
-                Text(
-                    text = "Run a Day",
-                    fontWeight = FontWeight.Bold
-                )
-            }, backgroundColor = Color.White,
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.RunSelection.route)
-                        }
-                    ) {
-                        Icon(
-                            Icons.Rounded.RunCircle,
-                            contentDescription = "",
-                            tint = Color(
-                                250, 82, 7
-                            )
-                        )
-                    }
-                })
+        bottomBar = {
+            BottomBar(navController = navController)
         },
         content = {
             Surface(color = Color(240, 241, 243)) {
@@ -72,13 +54,13 @@ fun Navigation(
                             slideInHorizontally(
                                 initialOffsetX = { -1200 },
                                 animationSpec = tween(400)
-                            ) + fadeIn(initialAlpha = 0.0f, animationSpec = tween(400))
+                            )
                         },
                         enterTransition = { _, _ ->
                             slideInHorizontally(
                                 initialOffsetX = { -1200 },
                                 animationSpec = tween(400)
-                            ) + fadeIn(initialAlpha = 0.0f, animationSpec = tween(400))
+                            )
                         }
                     ) {
                         SprintScreen(
@@ -97,13 +79,13 @@ fun Navigation(
                             slideInHorizontally(
                                 initialOffsetX = { -1200 },
                                 animationSpec = tween(400)
-                            ) + fadeIn(initialAlpha = 0.0f, animationSpec = tween(400))
+                            )
                         },
                         enterTransition = { _, _ ->
                             slideInHorizontally(
                                 initialOffsetX = { -1200 },
                                 animationSpec = tween(400)
-                            ) + fadeIn(initialAlpha = 0.0f, animationSpec = tween(400))
+                            )
                         }
                     ) {
                         HistoryScreen(
@@ -118,13 +100,13 @@ fun Navigation(
                             slideInHorizontally(
                                 initialOffsetX = { -1200 },
                                 animationSpec = tween(400)
-                            ) + fadeIn(initialAlpha = 0.0f, animationSpec = tween(400))
+                            )
                         },
                         enterTransition = { _, _ ->
                             slideInHorizontally(
                                 initialOffsetX = { -1200 },
                                 animationSpec = tween(400)
-                            ) + fadeIn(initialAlpha = 0.0f, animationSpec = tween(400))
+                            )
                         }
                     ) {
                         RunSelectionScreen(
@@ -132,6 +114,20 @@ fun Navigation(
                             onUpdateDistance = {
                                 runDistance = it
                             }
+                        )
+                    }
+                    composable(
+                        route = Screen.SettingsScreen.route,
+                    ) {
+                        SettingsScreen(
+                            navController = navController,
+                        )
+                    }
+                    composable(
+                        route = Screen.HomeScreen.route,
+                    ) {
+                       HomeScreen(
+                            navController = navController,
                         )
                     }
                 }
