@@ -217,12 +217,6 @@ fun SprintScreen(
                             navController.navigate(Screen.HistoryScreen.route)
                         }, PaddingValues(10.dp)
                     )
-                    FullWidthCard(
-                        string = if (hasRunToday)
-                            "You've run this distance today, great job!"
-                        else
-                            "You haven't run this distance yet today!"
-                    )
                 }
 
             }
