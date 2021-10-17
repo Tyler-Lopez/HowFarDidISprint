@@ -32,9 +32,6 @@ fun Navigation(
     startTracking: () -> Unit,
     stopTracking: () -> Unit
 ) {
-    var runDistance by rememberSaveable {
-        mutableStateOf(RunDistance.MILE)
-    }
 
     Scaffold(
 
@@ -65,7 +62,7 @@ fun Navigation(
                                 startTracking()
                             }, stopTracking = {
                                 stopTracking()
-                            }, runDistance = runDistance
+                            }, runDistance = DistanceTracker.runDistance
                         )
                     }
                     composable(
@@ -81,7 +78,7 @@ fun Navigation(
                     ) {
                         HistoryScreen(
                             navController = navController,
-                            runDistance = runDistance
+                            runDistance = DistanceTracker.runDistance
                         )
                     }
                     composable(
@@ -98,7 +95,7 @@ fun Navigation(
                         RunSelectionScreen(
                             navController = navController,
                             onUpdateDistance = {
-                                runDistance = it
+                                DistanceTracker.runDistance = it
                             }
                         )
                     }

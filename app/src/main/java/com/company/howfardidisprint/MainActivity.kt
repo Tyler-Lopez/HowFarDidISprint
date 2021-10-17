@@ -1,38 +1,16 @@
 package com.company.howfardidisprint
 
-import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.RunCircle
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.company.howfardidisprint.presentation.components.*
-import com.company.howfardidisprint.ui.theme.HowFarDidISprintTheme
-import com.company.howfardidisprint.ui.theme.roboto
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.*
-import kotlinx.coroutines.delay
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -44,8 +22,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Call the super class onCreate to complete the creation of activity
         super.onCreate(savedInstanceState)
-        // Reset the DistanceTracker data
-        DistanceTracker.resetSingleton()
+        // Reset the DistanceTracker data only IF not changing configurations
+        println("ON CREATE IS CALLED")
+        if (!isChangingConfigurations) {
+            println("ON CREATE IS CALLED WHEN NOT CHANGING CONFIGURATIONS")
+            DistanceTracker.resetSingleton()
+        } else {
+            println("ON CREATE IS CALLED WHEN CHANGING CONFIGURATIONS")
+        }
+
         setContent {
             Navigation(
                 navController = rememberAnimatedNavController(),

@@ -44,45 +44,28 @@ fun SprintScreen(
     navController: NavController,
     startTracking: () -> Unit,
     stopTracking: () -> Unit,
-    runDistance: RunDistance = RunDistance.QUARTERMILE,
+    runDistance: RunDistance,
 ) {
     // Update singleton with active run for purposes of tracking distance
-    DistanceTracker.runDistance = runDistance
-
+    println("""
+        RECOMPOSED
+        DISTANCE TRACKER INFO
+        ${DistanceTracker.getTime()}
+        ${DistanceTracker.endTime}
+    """.trimIndent())
     val context = LocalContext.current
     val mRunViewModel: RunViewModel = viewModel(
         factory = RunViewModelFactory(context.applicationContext as Application)
     )
-    mRunViewModel.filterDistance(runDistance, SortType.BY_DATE)
-
-    var leaderBoards = mRunViewModel.data.observeAsState(listOf()).value
-
-7
-    // This is kind of a hacky, bad solution to ensuring this is updated after the user runs
-    var hasRunToday by remember { mutableStateOf(false) }
-    LaunchedEffect(key1 = leaderBoards.size) {
-        hasRunToday = hasRunToday(leaderBoards)
-    }
 
     var distance by rememberSaveable { mutableStateOf(DistanceTracker.totalDistance) }
     var time by rememberSaveable { mutableStateOf(-1) }
     var speed by rememberSaveable { mutableStateOf(DistanceTracker.latestLocation?.speed ?: 0F) }
     var running by rememberSaveable { mutableStateOf(DistanceTracker.endTime != null) }
-    println("Distance tracker end time is ${DistanceTracker.endTime}")
-    println("Running is $running")
-    // Marked as experimental https://www.youtube.com/watch?v=1UujnB__Lek 17:70
-    val locationPermissionState =
-        rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
-    // Screen orientation
-    val configuration = LocalConfiguration.current
-    var isLandscape by remember {
-        mutableStateOf(false)
-    }
-    when (configuration.orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> isLandscape = true
-        else -> false
-    }
 
+    // Marked as experimental https://www.youtube.com/watch?v=1UujnB__Lek 17:70
+    val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
+    // Screen orientation
     // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
     LaunchedEffect(key1 = time, key2 = running) {
         // If the running flag is still true
@@ -153,43 +136,7 @@ fun SprintScreen(
                             "s"
                         )
                     }
-                    if (isLandscape) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .weight(1f),
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            OrangeButton(
-                                value =
-                                if (!locationPermissionState.hasPermission)
-                                    "Allow GPS Permission"
-                                else if (!running)
-                                    "Start"
-                                else "Stop"
-                            ) {
-                                // Permission check
-                                if (!locationPermissionState.hasPermission) {
-                                    locationPermissionState.launchPermissionRequest()
-                                }
-                                // If not yet tracking, begin tracking
-                                else if (DistanceTracker.startTime == null) {
-                                    running = true
-                                    DistanceTracker.startTime = System.currentTimeMillis()
-                                    startTracking() // Push information up to main activity to start this tracking
-                                    time = DistanceTracker.timeSinceStart()
-                                }
-                            }
-                            WhiteButton("View $runDistance History", {
-                                stopTracking()
-                                navController.navigate(Screen.HistoryScreen.route)
-                            }, PaddingValues(10.dp))
-                        }
-                    }
                 }
-
-                if (!isLandscape) {
                     OrangeButton(
                         value =
                         if (!locationPermissionState.hasPermission)
@@ -203,9 +150,9 @@ fun SprintScreen(
                             locationPermissionState.launchPermissionRequest()
                         }
                         // If not yet tracking, begin tracking
-                        else if (DistanceTracker.startTime == null) {
+                        else if (DistanceTracker.getTime() == null) {
                             running = true
-                            DistanceTracker.startTime = System.currentTimeMillis()
+                            DistanceTracker.setTime()
                             startTracking() // Push information up to main activity to start this tracking
                             time = DistanceTracker.timeSinceStart()
                         }
@@ -217,8 +164,6 @@ fun SprintScreen(
                             navController.navigate(Screen.HistoryScreen.route)
                         }, PaddingValues(10.dp)
                     )
-                }
-
             }
         }
     }
