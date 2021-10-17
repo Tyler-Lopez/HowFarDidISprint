@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.kapt
     id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -119,5 +120,11 @@ dependencies {
     // Permissions Helper https://github.com/AdamMc331/ComposePermissions/blob/development/app/build.gradle
     implementation "com.google.accompanist:accompanist-permissions:0.14.0"
 
+    //Dagger - Hilt
+    implementation "com.google.dagger:hilt-android:2.38.1"
+    kapt "com.google.dagger:hilt-android-compiler:2.37"
+    implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
+    kapt "androidx.hilt:hilt-compiler:1.0.0"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0-alpha03'
 
 }

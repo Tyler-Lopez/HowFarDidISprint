@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.company.howfardidisprint.domain.repository.RunDao
 
 // https://www.youtube.com/watch?v=vsDkhRTMdA0 @4:47
 @Database(entities = [Run::class], version = 2, exportSchema = false)

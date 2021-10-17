@@ -1,4 +1,4 @@
-package com.company.howfardidisprint
+package com.company.howfardidisprint.presentation.components
 
 
 import androidx.compose.foundation.border

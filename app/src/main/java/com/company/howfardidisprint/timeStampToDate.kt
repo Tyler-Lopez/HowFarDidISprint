@@ -39,23 +39,3 @@ fun hasRunToday(run: List<Run>): Boolean {
     println("HERE $dateOfRun // $day // $today")
     return day == today
 }
-
-/*
-LazyColumn() {
-                                                items(leaderBoards.size) {
-                                                    val score = leaderBoards[it]
-                                                    val dateOfRun = millisecondsToLocalDateTime(score.date)
-                                                    val day = dateOfRun.dayOfMonth
-                                                    val month = dateOfRun.monthValue
-                                                    val year = dateOfRun.year
-                                                    Text(
-                                                        text = " ${score.time} $day/$month/$year $test",
-                                                        fontSize = 15.sp,
-                                                        fontFamily = roboto,
-                                                        fontWeight = FontWeight.Normal,
-                                                        textAlign = TextAlign.Center,
-                                                        color = Color(40, 40, 40)
-                                                    )
-                                                    test++
-                                                }
-                                        }*/

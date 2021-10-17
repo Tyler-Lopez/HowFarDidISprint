@@ -94,8 +94,9 @@ class LocationTrackingService : Service() {
                         DistanceTracker.totalDistance += distanceInMeters.toLong()
                         // Are we over the total distance for the selected run?
                         if (DistanceTracker.totalDistance >= DistanceTracker.runDistance.distance) {
-                            stopLocationTracking()
                             DistanceTracker.endTime = System.currentTimeMillis()
+                            lastLocation = its_last
+                            stopLocationTracking()
                         }
                         lastLocation = its_last
                     }

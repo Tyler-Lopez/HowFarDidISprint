@@ -87,11 +87,8 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun pauseTracking() {
-        LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
-    }
-
     private fun stopTracking() {
+        LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
         stopService(LocationTrackingService.getIntent(this@MainActivity))
         DistanceTracker.resetSingleton()
     }

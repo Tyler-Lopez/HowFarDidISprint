@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import com.company.howfardidisprint.model.RunDistance
+import com.company.howfardidisprint.presentation.components.BottomBar
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -56,12 +57,7 @@ fun Navigation(
                                 animationSpec = tween(400)
                             )
                         },
-                        enterTransition = { _, _ ->
-                            slideInHorizontally(
-                                initialOffsetX = { -1200 },
-                                animationSpec = tween(400)
-                            )
-                        }
+                        enterTransition = null
                     ) {
                         SprintScreen(
                             navController = navController,
@@ -81,12 +77,7 @@ fun Navigation(
                                 animationSpec = tween(400)
                             )
                         },
-                        enterTransition = { _, _ ->
-                            slideInHorizontally(
-                                initialOffsetX = { -1200 },
-                                animationSpec = tween(400)
-                            )
-                        }
+                        enterTransition = null
                     ) {
                         HistoryScreen(
                             navController = navController,
@@ -102,12 +93,7 @@ fun Navigation(
                                 animationSpec = tween(400)
                             )
                         },
-                        enterTransition = { _, _ ->
-                            slideInHorizontally(
-                                initialOffsetX = { -1200 },
-                                animationSpec = tween(400)
-                            )
-                        }
+                        enterTransition = null
                     ) {
                         RunSelectionScreen(
                             navController = navController,

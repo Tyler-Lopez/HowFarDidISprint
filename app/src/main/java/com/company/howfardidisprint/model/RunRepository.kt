@@ -1,6 +1,7 @@
 package com.company.howfardidisprint.model
 
 import androidx.lifecycle.LiveData
+import com.company.howfardidisprint.domain.repository.RunDao
 
 
 class RunRepository(private val runDao: RunDao) {
