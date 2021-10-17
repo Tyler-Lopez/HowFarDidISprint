@@ -1,6 +1,7 @@
 package com.company.howfardidisprint.model
 
 enum class RunDistance(val distance: Long) {
+    TESTDISTANCE(50L),
     QUARTERMILE(400L),
     HALFMILE(805L),
     MILE(1609L),
@@ -9,6 +10,7 @@ enum class RunDistance(val distance: Long) {
 
     override fun toString(): String {
         return when(this) {
+            TESTDISTANCE -> "50 Meters"
             QUARTERMILE -> "Quarter Mile"
             HALFMILE -> "Half Mile"
             MILE -> "Mile"

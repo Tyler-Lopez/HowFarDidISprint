@@ -45,7 +45,7 @@ fun Navigation(
             Surface(color = Color(240, 241, 243)) {
                 AnimatedNavHost(
                     navController = navController,
-                    startDestination = Screen.SprintScreen.route,
+                    startDestination = Screen.HomeScreen.route,
                 ) {
                     composable(
                         route = Screen.SprintScreen.route,

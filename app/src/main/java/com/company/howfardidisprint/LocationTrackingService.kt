@@ -1,6 +1,5 @@
 package com.company.howfardidisprint
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
@@ -10,20 +9,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.company.howfardidisprint.TrackingData.lastLocation
 import com.google.android.gms.location.*
 
 class LocationTrackingService : Service() {
 
     private var startId = 0
+    private var lastLocation: Location? = null
 
     private lateinit var locationCallback: LocationCallback
     private lateinit var fusedClient: FusedLocationProviderClient
@@ -40,7 +37,6 @@ class LocationTrackingService : Service() {
         private const val GPS_ACTION = "GPS_ACTION"
         private const val ACTION_NAME = "ACTION_NAME"
 
-        const val ACTION_START_TRACKING = "ACTION_START_TRACKING" // Is this necessary?
         const val ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING"
 
         fun getIntent(context: Context) = Intent(context, LocationTrackingService::class.java)
@@ -77,8 +73,6 @@ class LocationTrackingService : Service() {
         // initialize location request object
         // Reset distance and last location location
         DistanceTracker.totalDistance = 0L
-        DistanceTracker.latestSpeed = 0f
-
 
         val locationRequest = LocationRequest().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -89,16 +83,20 @@ class LocationTrackingService : Service() {
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(result: LocationResult?) {
                 result?.let {
+                    // If lastLocation is null, set it equal to most recent location then return
                     if (lastLocation == null) {
                         lastLocation = it.lastLocation
                         return@let
                     }
                     it.lastLocation?.let { its_last ->
                         val distanceInMeters = its_last.distanceTo(lastLocation)
-                        DistanceTracker.latestSpeed = its_last.speed
+                        DistanceTracker.latestLocation = it.lastLocation
                         DistanceTracker.totalDistance += distanceInMeters.toLong()
-                        if (DistanceTracker.totalDistance >= DistanceTracker.runDistance.distance) TrackingData.isTracking = false // If we're over the necessary meters, stop tracking
-                        println("TRACKER" + "Completed: ${DistanceTracker.totalDistance} meters, (added $distanceInMeters)")
+                        // Are we over the total distance for the selected run?
+                        if (DistanceTracker.totalDistance >= DistanceTracker.runDistance.distance) {
+                            stopLocationTracking()
+                            DistanceTracker.endTime = System.currentTimeMillis()
+                        }
                         lastLocation = its_last
                     }
                 }

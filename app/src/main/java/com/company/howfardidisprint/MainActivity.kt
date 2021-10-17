@@ -42,44 +42,41 @@ class MainActivity : ComponentActivity() {
     @ExperimentalMaterialApi
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Call the super class onCreate to complete the creation of activity
         super.onCreate(savedInstanceState)
-
+        // Reset the DistanceTracker data
+        DistanceTracker.resetSingleton()
         setContent {
-            val navController = rememberAnimatedNavController()
-
-            HowFarDidISprintTheme {
-
-                // A surface container using the 'background' color from the theme
-                Navigation(
-                    navController = navController,
-                    startTracking = {
-                        startTracking()
-                    },
-                    stopTracking = {
-                        stopTracking()
-                    })
-            }
+            Navigation(
+                navController = rememberAnimatedNavController(),
+                startTracking = {
+                    startTracking()
+                },
+                stopTracking = {
+                    stopTracking()
+                })
         }
     }
 
-    // Is it necessary to call all three here?
     override fun onPause() {
-        // https://stackoverflow.com/questions/10971284/detect-activity-being-paused-due-to-configuration-change
-        if (!isChangingConfigurations)
-            stopTracking()
         super.onPause()
+        println("ON PAUSE IS CALLED")
+        // https://stackoverflow.com/questions/10971284/detect-activity-being-paused-due-to-configuration-change
     }
 
     override fun onStop() {
-        if (!isChangingConfigurations)
-            stopTracking()
         super.onStop()
+        println("ON STOP IS CALLED")
+       // if (!isChangingConfigurations)
+        //    stopTracking()
     }
 
-    override fun onDestroy() {
-        if (!isChangingConfigurations)
-            stopTracking()
-        super.onDestroy()
+    override fun onResume() {
+        super.onResume()
+        println("ON RESUME IS CALLED")
+        //if (DistanceTracker.endTime != null) {
+        //    stopTracking()
+       // }
     }
 
     private fun startTracking() {
@@ -90,10 +87,13 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun stopTracking() {
+    private fun pauseTracking() {
         LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
+    }
+
+    private fun stopTracking() {
         stopService(LocationTrackingService.getIntent(this@MainActivity))
-        refreshSingleton()
+        DistanceTracker.resetSingleton()
     }
 }
 

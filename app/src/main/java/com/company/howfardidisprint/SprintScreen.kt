@@ -54,9 +54,10 @@ fun SprintScreen(
         factory = RunViewModelFactory(context.applicationContext as Application)
     )
     mRunViewModel.filterDistance(runDistance, SortType.BY_DATE)
+
     var leaderBoards = mRunViewModel.data.observeAsState(listOf()).value
 
-
+7
     // This is kind of a hacky, bad solution to ensuring this is updated after the user runs
     var hasRunToday by remember { mutableStateOf(false) }
     LaunchedEffect(key1 = leaderBoards.size) {
@@ -65,8 +66,10 @@ fun SprintScreen(
 
     var distance by rememberSaveable { mutableStateOf(DistanceTracker.totalDistance) }
     var time by rememberSaveable { mutableStateOf(-1) }
-    var speed by rememberSaveable { mutableStateOf(DistanceTracker.latestSpeed) }
-    var running by rememberSaveable { mutableStateOf(TrackingData.isTracking) }
+    var speed by rememberSaveable { mutableStateOf(DistanceTracker.latestLocation?.speed ?: 0F) }
+    var running by rememberSaveable { mutableStateOf(DistanceTracker.endTime != null) }
+    println("Distance tracker end time is ${DistanceTracker.endTime}")
+    println("Running is $running")
     // Marked as experimental https://www.youtube.com/watch?v=1UujnB__Lek 17:70
     val locationPermissionState =
         rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -81,18 +84,16 @@ fun SprintScreen(
     }
 
     // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
-    LaunchedEffect(key1 = time) {
+    LaunchedEffect(key1 = time, key2 = running) {
         // If the running flag is still true
-        if (TrackingData.isTracking) {
-            speed =
-                DistanceTracker.latestSpeed // Update speed variable with latest speed
-            distance =
-                DistanceTracker.totalDistance // Update distance with latest speed
+        if (DistanceTracker.endTime == null) {
+            speed = DistanceTracker.latestLocation?.speed ?: 0F // Update speed variable with latest speed
+            distance = DistanceTracker.totalDistance // Update distance with latest speed
             delay(1000L) // Wait one second
-            time = timeSinceStart()
-            running = TrackingData.isTracking
+            time = DistanceTracker.timeSinceStart()
         } else { // This would occur if we have reached over > 400 meters
             distance = DistanceTracker.totalDistance
+            time = DistanceTracker.timeSinceStart()
             if (distance >= DistanceTracker.runDistance.distance) {
                 mRunViewModel.insertRun(
                     Run(
@@ -102,8 +103,8 @@ fun SprintScreen(
                     )
                 )
             }
-            stopTracking() // Push information up to main activity to close this tracking
             running = false
+            stopTracking() // Push information up to main activity to close this tracking
         }
     }
     Column(
@@ -173,13 +174,11 @@ fun SprintScreen(
                                     locationPermissionState.launchPermissionRequest()
                                 }
                                 // If not yet tracking, begin tracking
-                                else if (!TrackingData.isTracking) {
-                                    TrackingData.trackingStartedOn =
-                                        System.currentTimeMillis()
-                                    startTracking() // Push information up to main activity to start this tracking
-                                    TrackingData.isTracking = true
+                                else if (DistanceTracker.startTime == null) {
                                     running = true
-                                    time = timeSinceStart()
+                                    DistanceTracker.startTime = System.currentTimeMillis()
+                                    startTracking() // Push information up to main activity to start this tracking
+                                    time = DistanceTracker.timeSinceStart()
                                 }
                             }
                             WhiteButton("View $runDistance History", {
@@ -204,16 +203,15 @@ fun SprintScreen(
                             locationPermissionState.launchPermissionRequest()
                         }
                         // If not yet tracking, begin tracking
-                        else if (!TrackingData.isTracking) {
-                            TrackingData.trackingStartedOn =
-                                System.currentTimeMillis()
-                            startTracking() // Push information up to main activity to start this tracking
-                            TrackingData.isTracking = true
+                        else if (DistanceTracker.startTime == null) {
                             running = true
-                            time = timeSinceStart()
+                            DistanceTracker.startTime = System.currentTimeMillis()
+                            startTracking() // Push information up to main activity to start this tracking
+                            time = DistanceTracker.timeSinceStart()
                         }
                     }
-                    WhiteButton("View $runDistance History",
+                    WhiteButton(
+                        "View $runDistance History",
                         onClick = {
                             stopTracking()
                             navController.navigate(Screen.HistoryScreen.route)
@@ -221,9 +219,9 @@ fun SprintScreen(
                     )
                     FullWidthCard(
                         string = if (hasRunToday)
-                            "You've run today, great job!"
+                            "You've run this distance today, great job!"
                         else
-                            "You haven't run yet today!"
+                            "You haven't run this distance yet today!"
                     )
                 }
 

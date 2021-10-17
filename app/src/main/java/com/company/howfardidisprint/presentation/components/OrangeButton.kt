@@ -14,9 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.company.howfardidisprint.LocationTrackingService
-import com.company.howfardidisprint.TrackingData
-import com.company.howfardidisprint.timeSinceStart
 import com.company.howfardidisprint.ui.theme.roboto
 
 @Composable
