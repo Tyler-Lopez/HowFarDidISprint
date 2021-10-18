@@ -62,7 +62,7 @@ fun Navigation(
                                 startTracking()
                             }, stopTracking = {
                                 stopTracking()
-                            }, runDistance = DistanceTracker.runDistance
+                            }, runDistance = DistanceTracker.getRunType()
                         )
                     }
                     composable(
@@ -78,7 +78,7 @@ fun Navigation(
                     ) {
                         HistoryScreen(
                             navController = navController,
-                            runDistance = DistanceTracker.runDistance
+                            runDistance = DistanceTracker.getRunType()
                         )
                     }
                     composable(
@@ -95,7 +95,7 @@ fun Navigation(
                         RunSelectionScreen(
                             navController = navController,
                             onUpdateDistance = {
-                                DistanceTracker.runDistance = it
+                                DistanceTracker.setRunType(it)
                             }
                         )
                     }

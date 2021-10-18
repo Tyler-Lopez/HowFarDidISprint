@@ -72,7 +72,7 @@ class LocationTrackingService : Service() {
     private fun startLocationUpdates() {
         // initialize location request object
         // Reset distance and last location location
-        DistanceTracker.totalDistance = 0L
+        DistanceTracker.setDistance(0L)
 
         val locationRequest = LocationRequest().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -90,11 +90,11 @@ class LocationTrackingService : Service() {
                     }
                     it.lastLocation?.let { its_last ->
                         val distanceInMeters = its_last.distanceTo(lastLocation)
-                        DistanceTracker.latestLocation = it.lastLocation
-                        DistanceTracker.totalDistance += distanceInMeters.toLong()
+                        DistanceTracker.setLocation(it.lastLocation)
+                        DistanceTracker.setDistance(distanceInMeters.toLong())
                         // Are we over the total distance for the selected run?
-                        if (DistanceTracker.totalDistance >= DistanceTracker.runDistance.distance) {
-                            DistanceTracker.endTime = System.currentTimeMillis()
+                        if (DistanceTracker.getTotalDistance() >= DistanceTracker.getRunType().distance) {
+                            DistanceTracker.setEndTime()
                             lastLocation = its_last
                             stopLocationTracking()
                         }

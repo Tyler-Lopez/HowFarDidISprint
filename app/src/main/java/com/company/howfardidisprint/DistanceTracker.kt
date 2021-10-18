@@ -7,34 +7,65 @@ import com.company.howfardidisprint.model.RunDistance
 object DistanceTracker {
     // Why private val and getter/setter?
     // Essential for thread safe singleton https://codereview.stackexchange.com/questions/214313/destroy-singleton-pattern-in-kotlin
-    var totalDistance = 0L
-    var latestLocation: Location? = null
-    var runDistance: RunDistance = RunDistance.MILE
+    private val runDistance: MutableList<RunDistance> = mutableListOf()
+    private val latestLocation: MutableList<Location> = mutableListOf()
+    private val totalDistance: MutableList<Long> = mutableListOf()
     private val startTime: MutableList<Long> = mutableListOf()
-    fun getTime(): Long? {
-        return if (startTime.isEmpty()) {
-            null
-        } else {
-            startTime.first()
+    private val endTime: MutableList<Long> = mutableListOf()
+
+    // Getters
+    fun getRunType(): RunDistance = if (runDistance.isEmpty()) RunDistance.MILE else runDistance.first()
+    fun getLocation(): Location? = if (latestLocation.isEmpty()) null else latestLocation.first()
+    fun getTotalDistance(): Long = if (totalDistance.isEmpty()) 0L else totalDistance.first()
+    fun getStartTime(): Long? = if (startTime.isEmpty()) null else startTime.first()
+    fun getEndTime(): Long? = if (endTime.isEmpty()) null else startTime.first()
+
+    // Setters
+    fun setRunType(runDistanceType: RunDistance) {
+        runDistance.apply {
+            this.clear()
+            this.add(0, runDistanceType)
+        }
+    }
+    fun setLocation(location: Location) {
+        latestLocation.apply {
+            this.clear()
+            this.add(0, location)
+        }
+    }
+    fun setDistance(distanceIncrease: Long) {
+        totalDistance.apply {
+            val previousDistance = getTotalDistance()
+            this.clear()
+            this.add(0, previousDistance + distanceIncrease)
         }
     }
     fun setTime() {
-        startTime.add(0, System.currentTimeMillis())
+        startTime.apply {
+            this.clear()
+            this.add(0, System.currentTimeMillis())
+        }
+    }
+    fun setEndTime() {
+        endTime.apply {
+            this.clear()
+            this.add(0, System.currentTimeMillis())
+        }
     }
 
-    var endTime: Long? = null
 
     fun resetSingleton() {
-        latestLocation = null
-        totalDistance = 0L
-        endTime = null
+        latestLocation.clear()
+        totalDistance.clear()
+        startTime.clear()
+        endTime.clear()
     }
 
     fun timeSinceStart(): Int {
-        return if (endTime != null) {
-            (((endTime ?: 0L) - (getTime() ?: 0L)) / 1000).toInt()
+        return if (getEndTime() != null) {
+            (((getEndTime()!!) - (getStartTime()!!)) / 1000).toInt()
         } else {
-            ((System.currentTimeMillis() - (getTime() ?: System.currentTimeMillis())) / 1000).toInt()
+            ((System.currentTimeMillis() - (getStartTime() ?: System.currentTimeMillis())) / 1000).toInt()
         }
     }
 }

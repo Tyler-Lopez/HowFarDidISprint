@@ -34,6 +34,7 @@ import com.company.howfardidisprint.presentation.components.*
 import com.company.howfardidisprint.ui.theme.roboto
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.nearby.messages.Distance
 import kotlinx.coroutines.delay
 import java.util.*
 
@@ -47,21 +48,15 @@ fun SprintScreen(
     runDistance: RunDistance,
 ) {
     // Update singleton with active run for purposes of tracking distance
-    println("""
-        RECOMPOSED
-        DISTANCE TRACKER INFO
-        ${DistanceTracker.getTime()}
-        ${DistanceTracker.endTime}
-    """.trimIndent())
     val context = LocalContext.current
     val mRunViewModel: RunViewModel = viewModel(
         factory = RunViewModelFactory(context.applicationContext as Application)
     )
 
-    var distance by rememberSaveable { mutableStateOf(DistanceTracker.totalDistance) }
-    var time by rememberSaveable { mutableStateOf(-1) }
-    var speed by rememberSaveable { mutableStateOf(DistanceTracker.latestLocation?.speed ?: 0F) }
-    var running by rememberSaveable { mutableStateOf(DistanceTracker.endTime != null) }
+    var distance by rememberSaveable { mutableStateOf(DistanceTracker.getTotalDistance()) }
+    var time by rememberSaveable { mutableStateOf(DistanceTracker.timeSinceStart()) }
+    var speed by rememberSaveable { mutableStateOf(DistanceTracker.getLocation()?.speed ?: 0F) }
+    var running by rememberSaveable { mutableStateOf(DistanceTracker.getStartTime() != null) }
 
     // Marked as experimental https://www.youtube.com/watch?v=1UujnB__Lek 17:70
     val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -69,15 +64,14 @@ fun SprintScreen(
     // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
     LaunchedEffect(key1 = time, key2 = running) {
         // If the running flag is still true
-        if (DistanceTracker.endTime == null) {
-            speed = DistanceTracker.latestLocation?.speed ?: 0F // Update speed variable with latest speed
-            distance = DistanceTracker.totalDistance // Update distance with latest speed
-            delay(1000L) // Wait one second
+        if (DistanceTracker.getStartTime() != null) {
+            speed = DistanceTracker.getLocation()?.speed ?: 0F // Update speed variable with latest speed
+            distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
+            delay(100L) // Wait 1/10 second
+            speed = DistanceTracker.getLocation()?.speed ?: 0F // Update speed variable with latest speed
+            distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
             time = DistanceTracker.timeSinceStart()
-        } else { // This would occur if we have reached over > 400 meters
-            distance = DistanceTracker.totalDistance
-            time = DistanceTracker.timeSinceStart()
-            if (distance >= DistanceTracker.runDistance.distance) {
+            if (distance >= DistanceTracker.getRunType().distance) {
                 mRunViewModel.insertRun(
                     Run(
                         startTime = dateToTimestamp(Calendar.getInstance().time) ?: 0L,
@@ -85,9 +79,9 @@ fun SprintScreen(
                         distance = runDistance
                     )
                 )
+                running = false
+                stopTracking() // Push information up to main activity to close this tracking
             }
-            running = false
-            stopTracking() // Push information up to main activity to close this tracking
         }
     }
     Column(
@@ -150,11 +144,14 @@ fun SprintScreen(
                             locationPermissionState.launchPermissionRequest()
                         }
                         // If not yet tracking, begin tracking
-                        else if (DistanceTracker.getTime() == null) {
+                        else if (DistanceTracker.getStartTime() == null) {
                             running = true
                             DistanceTracker.setTime()
                             startTracking() // Push information up to main activity to start this tracking
                             time = DistanceTracker.timeSinceStart()
+                        }
+                        else {
+                            running = !running
                         }
                     }
                     WhiteButton(
