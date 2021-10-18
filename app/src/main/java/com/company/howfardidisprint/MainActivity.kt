@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         println("ON CREATE IS CALLED")
         if (!isChangingConfigurations) {
             println("ON CREATE IS CALLED WHEN NOT CHANGING CONFIGURATIONS")
-            DistanceTracker.resetSingleton()
+         //   DistanceTracker.resetSingleton()
         } else {
             println("ON CREATE IS CALLED WHEN CHANGING CONFIGURATIONS")
         }

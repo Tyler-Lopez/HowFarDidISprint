@@ -54,20 +54,20 @@ fun SprintScreen(
     )
 
     var distance by rememberSaveable { mutableStateOf(DistanceTracker.getTotalDistance()) }
-    var time by rememberSaveable { mutableStateOf(DistanceTracker.timeSinceStart()) }
+    var time by rememberSaveable { mutableStateOf(-1) }
     var speed by rememberSaveable { mutableStateOf(DistanceTracker.getLocation()?.speed ?: 0F) }
     var running by rememberSaveable { mutableStateOf(DistanceTracker.getStartTime() != null) }
-
     // Marked as experimental https://www.youtube.com/watch?v=1UujnB__Lek 17:70
     val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
     // Screen orientation
     // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
-    LaunchedEffect(key1 = time, key2 = running) {
+    LaunchedEffect(key1 = time) {
         // If the running flag is still true
         if (DistanceTracker.getStartTime() != null) {
             speed = DistanceTracker.getLocation()?.speed ?: 0F // Update speed variable with latest speed
             distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
-            delay(100L) // Wait 1/10 second
+            time = DistanceTracker.timeSinceStart()
+            delay(1000L) // Wait 1/10 second
             speed = DistanceTracker.getLocation()?.speed ?: 0F // Update speed variable with latest speed
             distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
             time = DistanceTracker.timeSinceStart()
@@ -145,13 +145,10 @@ fun SprintScreen(
                         }
                         // If not yet tracking, begin tracking
                         else if (DistanceTracker.getStartTime() == null) {
-                            running = true
                             DistanceTracker.setTime()
-                            startTracking() // Push information up to main activity to start this tracking
                             time = DistanceTracker.timeSinceStart()
-                        }
-                        else {
-                            running = !running
+                            running = true
+                            startTracking() // Push information up to main activity to start this tracking
                         }
                     }
                     WhiteButton(
