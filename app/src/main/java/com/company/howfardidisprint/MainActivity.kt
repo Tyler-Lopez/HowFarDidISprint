@@ -1,5 +1,6 @@
 package com.company.howfardidisprint
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -76,6 +77,7 @@ class MainActivity : ComponentActivity() {
         LocationTrackingService.stopTracking(this@MainActivity) // Stop tracking the location!
         stopService(LocationTrackingService.getIntent(this@MainActivity))
         DistanceTracker.resetSingleton()
+        val context: Context = this@MainActivity
     }
 }
 
