@@ -1,9 +1,7 @@
 package com.company.howfardidisprint.presentation.components
 
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -44,7 +42,7 @@ fun BottomBar(navController: NavController) {
     BottomNavigation(
         backgroundColor = Color.White,
         elevation = 5.dp,
-        modifier = Modifier.height(50.dp)
+        modifier = Modifier.height(75.dp)
     ) {
         // observe the backstack
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -61,13 +59,23 @@ fun BottomBar(navController: NavController) {
                 selectedContentColor = Color(250, 82, 7),
                 unselectedContentColor = Color.Gray,
                 icon = {
-                    Column(horizontalAlignment = CenterHorizontally) {
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(vertical = 10.dp)
+                    ) {
                         Icon(
                             imageVector = it.icon,
                             contentDescription = it.label,
+                            modifier = Modifier
+                                .weight(2.0f)
+                                .size(50.dp)
                         )
                         Text(
-                            text = it.label
+                            text = it.label,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 },
