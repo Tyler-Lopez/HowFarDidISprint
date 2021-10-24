@@ -1,16 +1,18 @@
 package com.company.howfardidisprint.presentation.components
 
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.RunCircle
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -39,12 +41,11 @@ val BottomNavItems = listOf(
 
 @Composable
 fun BottomBar(navController: NavController) {
-    BottomAppBar(
-
-        // set background color
-        backgroundColor = Color.White, modifier = Modifier.shadow(10.dp)
+    BottomNavigation(
+        backgroundColor = Color.White,
+        elevation = 5.dp,
+        modifier = Modifier.height(50.dp)
     ) {
-
         // observe the backstack
         val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -52,33 +53,26 @@ fun BottomBar(navController: NavController) {
         // color,label color when navigated
         val currentRoute = navBackStackEntry?.destination?.route
 
-        // Bottom nav items we declared
 
-        BottomNavItems.forEach() { navItem ->
-
-            // Place the bottom nav items
+        BottomNavItems.forEach {
             BottomNavigationItem(
-
-                // it currentRoute is equal then its selected route
-                selected = currentRoute == navItem.route,
-
-                // navigate on click
-                onClick = {
-                    navController.navigate(navItem.route)
-                },
-
-                // Icon of navItem
+                selected = currentRoute == it.route,
+                onClick = { navController.navigate(it.route) },
+                selectedContentColor = Color(250, 82, 7),
+                unselectedContentColor = Color.Gray,
                 icon = {
-                    Icon(
-                        imageVector = navItem.icon,
-                        contentDescription = navItem.label,
-                        modifier = Modifier.size(30.dp),
-                        tint = Color(
-                            250, 82, 7
+                    Column(horizontalAlignment = CenterHorizontally) {
+                        Icon(
+                            imageVector = it.icon,
+                            contentDescription = it.label,
                         )
-                    )
+                        Text(
+                            text = it.label
+                        )
+                    }
                 },
             )
+
         }
     }
 }
