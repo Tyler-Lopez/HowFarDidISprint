@@ -40,6 +40,6 @@ fun SettingsScreen(
             .padding(top = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        SubHeader("Settings")
+        SubHeader("Settings ")
     }
 }
