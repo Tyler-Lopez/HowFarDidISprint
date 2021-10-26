@@ -22,13 +22,13 @@ fun FieldValue(
             .fillMaxWidth()
             .padding(vertical = 1.dp)
             .padding(horizontal = 10.dp)
-            .height(60.dp),
+            .height(100.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
             text = value,
-            fontSize = 30.sp,
+            fontSize = 60.sp,
             fontFamily = roboto,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
@@ -36,7 +36,7 @@ fun FieldValue(
         )
         Text(
             text = " $unit",
-            fontSize = 15.sp,
+            fontSize = 30.sp,
             fontFamily = roboto,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,

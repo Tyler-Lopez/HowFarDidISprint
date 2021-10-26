@@ -120,7 +120,7 @@ fun SprintScreen(
                         FieldTitle(text = "Time")
                     }
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(2f),
                         horizontalAlignment = Alignment.Start
                     ) {
                         FieldValue("%.2f".format(speed), "m/s")
