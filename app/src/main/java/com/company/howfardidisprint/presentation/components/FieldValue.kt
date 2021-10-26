@@ -36,7 +36,7 @@ fun FieldValue(
         )
         Text(
             text = " $unit",
-            fontSize = 30.sp,
+            fontSize = 25.sp,
             fontFamily = roboto,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,

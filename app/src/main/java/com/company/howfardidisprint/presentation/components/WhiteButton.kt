@@ -42,7 +42,7 @@ fun WhiteButton(value: String, onClick: () -> Unit, padding: PaddingValues) {
         Text(
             text = value,
             style = TextStyle(
-                fontSize = 18.sp,
+                fontSize = 24.sp,
                 fontFamily = roboto,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,

@@ -41,7 +41,7 @@ fun OrangeButton(value: String, onClick: () -> Unit) {
             text = value,
             style = TextStyle(
                 color = Color(255, 255, 255),
-                fontSize = 20.sp,
+                fontSize = 30.sp,
                 fontFamily = roboto,
                 letterSpacing = (-1).sp,
                 fontWeight = FontWeight.Medium,
