@@ -16,13 +16,6 @@ class RunViewModel(application: Application): AndroidViewModel(application) {
         data = repository.readAllDataSortDate
     }
 
-    fun filterDistance(runDistance: RunDistance, sortType: SortType) {
-        data = when (sortType) {
-            SortType.BY_DATE -> repository.getDataByDistanceSortDate(runDistance)
-            SortType.BY_SPEED -> repository.getDataByDistanceSortSpeed(runDistance)
-        }
-    }
-
     fun insertRun(run: Run) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addRun(run)

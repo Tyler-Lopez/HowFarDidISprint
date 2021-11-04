@@ -1,32 +1,23 @@
 package com.company.howfardidisprint
 
 import android.location.Location
-import com.company.howfardidisprint.model.RunDistance
 
 // Singleton used to report tracking status from the Service to the Activity
 object DistanceTracker {
     // Why private val and getter/setter?
     // Essential for thread safe singleton https://codereview.stackexchange.com/questions/214313/destroy-singleton-pattern-in-kotlin
-    private val runDistance: MutableList<RunDistance> = mutableListOf()
     private val latestLocation: MutableList<Location> = mutableListOf()
     private val totalDistance: MutableList<Long> = mutableListOf()
     private val startTime: MutableList<Long> = mutableListOf()
     private val endTime: MutableList<Long> = mutableListOf()
 
     // Getters
-    fun getRunType(): RunDistance = if (runDistance.isEmpty()) RunDistance.MILE else runDistance.first()
     fun getLocation(): Location? = if (latestLocation.isEmpty()) null else latestLocation.first()
     fun getTotalDistance(): Long = if (totalDistance.isEmpty()) 0L else totalDistance.first()
     fun getStartTime(): Long? = if (startTime.isEmpty()) null else startTime.first()
     fun getEndTime(): Long? = if (endTime.isEmpty()) null else startTime.first()
 
     // Setters
-    fun setRunType(runDistanceType: RunDistance) {
-        runDistance.apply {
-            this.clear()
-            this.add(0, runDistanceType)
-        }
-    }
     fun setLocation(location: Location) {
         latestLocation.apply {
             this.clear()

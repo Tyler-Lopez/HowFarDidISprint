@@ -77,6 +77,7 @@ fun SprintScreen(
             time = DistanceTracker.timeSinceStart()
         }
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -149,7 +150,7 @@ fun SprintScreen(
                     // Otherwise we are currently recording and should stop
                     else {
                         running = false
-                        if (distance > 100L) {
+                       // if (distance > 100L) {
                             DistanceTracker.setEndTime()
                             mRunViewModel.insertRun(
                                 Run(
@@ -158,7 +159,7 @@ fun SprintScreen(
                                     distance = DistanceTracker.getTotalDistance()
                                 )
                             )
-                        }
+                       // }
                         // RESET TIME TO -1
                         // This is done so when the button is pushed again and it is set to 0 that our co-routine starts tracking
                         time = -1

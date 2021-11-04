@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Card
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
@@ -20,24 +19,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.company.howfardidisprint.model.RunDistance
 import com.company.howfardidisprint.model.RunViewModel
 import com.company.howfardidisprint.model.RunViewModelFactory
-import com.company.howfardidisprint.model.SortType
 import com.company.howfardidisprint.presentation.components.*
 import com.company.howfardidisprint.ui.theme.roboto
 
 @Composable
 fun HistoryScreen(
     navController: NavController,
-    runDistance: RunDistance = RunDistance.QUARTERMILE,
 ) {
     val context = LocalContext.current
     val mRunViewModel: RunViewModel = viewModel(
         factory = RunViewModelFactory(context.applicationContext as Application)
     )
 
-    mRunViewModel.filterDistance(runDistance, SortType.BY_DATE)
 
     var leaderBoards = mRunViewModel.data.observeAsState(listOf()).value
 
@@ -46,7 +41,7 @@ fun HistoryScreen(
             .fillMaxSize()
             .padding(top = 10.dp)
     ) {
-        SubHeader("${runDistance.toString().uppercase()} HISTORY")
+        SubHeader("HISTORY")
         if (leaderBoards.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -127,7 +122,7 @@ fun HistoryScreen(
             ) {
                 Card(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
                     Text(
-                        text = "You haven't run $runDistance yet",
+                        text = "You haven't run yet",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(20.dp))
