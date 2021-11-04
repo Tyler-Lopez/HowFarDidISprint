@@ -61,7 +61,7 @@ fun Navigation(
                                 startTracking()
                             }, stopTracking = {
                                 stopTracking()
-                            }, runDistance = DistanceTracker.getRunType()
+                            }
                         )
                     }
                     composable(
@@ -90,7 +90,7 @@ fun Navigation(
                     composable(
                         route = Screen.HomeScreen.route,
                     ) {
-                       HomeScreen(
+                        HomeScreen(
                             navController = navController,
                         )
                     }

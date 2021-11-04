@@ -13,5 +13,5 @@ data class Run(
     @ColumnInfo(name = "time")
     val totalTime: Int, // Seconds
     @ColumnInfo(name = "distance")
-    val distance: RunDistance //
+    val distance: Long
 )

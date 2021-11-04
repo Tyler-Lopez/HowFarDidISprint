@@ -92,12 +92,6 @@ class LocationTrackingService : Service() {
                         val distanceInMeters = its_last.distanceTo(lastLocation)
                         DistanceTracker.setLocation(it.lastLocation)
                         DistanceTracker.setDistance(distanceInMeters.toLong())
-                        // Are we over the total distance for the selected run?
-                        if (DistanceTracker.getTotalDistance() >= DistanceTracker.getRunType().distance) {
-                            DistanceTracker.setEndTime()
-                            lastLocation = its_last
-                            stopLocationTracking()
-                        }
                         lastLocation = its_last
                     }
                 }

@@ -46,7 +46,6 @@ import java.util.*
 fun SprintScreen(
     startTracking: () -> Unit,
     stopTracking: () -> Unit,
-    runDistance: RunDistance,
 ) {
     // Update singleton with active run for purposes of tracking distance
     val context = LocalContext.current
@@ -62,9 +61,10 @@ fun SprintScreen(
     val locationPermissionState =
         rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
     // Screen orientation
-    // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
+
+    // WHEN TIME IS CHANGED, LAUNCH EFFECT
+    // This coroutine listens for changes in a key, everytime time is changed invoke the co-routine again
     LaunchedEffect(key1 = time) {
-        // If the running flag is still true
         if (DistanceTracker.getStartTime() != null) {
             speed = DistanceTracker.getLocation()?.speed
                 ?: 0F // Update speed variable with latest speed
@@ -75,17 +75,6 @@ fun SprintScreen(
                 ?: 0F // Update speed variable with latest speed
             distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
             time = DistanceTracker.timeSinceStart()
-            if (distance >= DistanceTracker.getRunType().distance) {
-                mRunViewModel.insertRun(
-                    Run(
-                        startTime = dateToTimestamp(Calendar.getInstance().time) ?: 0L,
-                        totalTime = time,
-                        distance = runDistance
-                    )
-                )
-                running = false
-                stopTracking() // Push information up to main activity to close this tracking
-            }
         }
     }
     Column(
@@ -160,6 +149,19 @@ fun SprintScreen(
                     // Otherwise we are currently recording and should stop
                     else {
                         running = false
+                        if (distance > 100L) {
+                            DistanceTracker.setEndTime()
+                            mRunViewModel.insertRun(
+                                Run(
+                                    startTime = dateToTimestamp(Calendar.getInstance().time) ?: 0L,
+                                    totalTime = time,
+                                    distance = DistanceTracker.getTotalDistance()
+                                )
+                            )
+                        }
+                        // RESET TIME TO -1
+                        // This is done so when the button is pushed again and it is set to 0 that our co-routine starts tracking
+                        time = -1
                         stopTracking()
                     }
                 }
@@ -175,7 +177,7 @@ fun SprintScreen(
                     Text(
                         text = when {
                             !locationPermissionState.hasPermission -> "Requires GPS Permission"
-                            running -> "Currently Recording"
+                            running -> "Press to Save Run"
                             else -> "Press to Begin Recording"
                         },
                         color = Color.Gray,
