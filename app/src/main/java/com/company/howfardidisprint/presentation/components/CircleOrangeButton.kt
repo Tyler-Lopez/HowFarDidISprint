@@ -28,13 +28,13 @@ fun CircleOrangeButton(
         Button(
             modifier = Modifier
                 .size(100.dp)
-                .padding(10.dp)
+                .padding(5.dp)
                 .clip(shape = CircleShape)
                 .shadow(5.dp),
             onClick = {
                 onClick()
             },
-            shape = RoundedCornerShape(5.dp),
+            shape = CircleShape,
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(
                     250, 82, 7

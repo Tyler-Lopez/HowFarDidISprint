@@ -154,29 +154,14 @@ fun SprintScreen(
                         startTracking() // Push information up to main activity to start this tracking
                     }
                 }
-                /*
-                OrangeButton(
-                    value =
-                    if (!locationPermissionState.hasPermission)
-                        "Allow GPS Permission"
-                    else if (!running)
-                        "Start"
-                    else "Stop"
-                ) {
-                    // Permission check
-                    if (!locationPermissionState.hasPermission) {
-                        locationPermissionState.launchPermissionRequest()
-                    }
-                    // If not yet tracking, begin tracking
-                    else if (DistanceTracker.getStartTime() == null) {
-                        DistanceTracker.setTime()
-                        time = DistanceTracker.timeSinceStart()
-                        running = true
-                        startTracking() // Push information up to main activity to start this tracking
-                    }
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Text(
+                        text = "Subtext example.",
+                        color = Color.Gray,
+                        fontSize = 20.sp
+                    )
                 }
-                
-                 */
+
             }
         }
     }

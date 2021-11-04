@@ -28,9 +28,9 @@ fun FieldValue(
     ) {
         Text(
             text = value,
-            fontSize = 60.sp,
+            fontSize = 55.sp,
             fontFamily = roboto,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight(410),
             textAlign = TextAlign.Center,
             color = Color(20, 20, 20),
         )
@@ -38,7 +38,7 @@ fun FieldValue(
             text = " $unit",
             fontSize = 25.sp,
             fontFamily = roboto,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight(410),
             textAlign = TextAlign.Center,
             color = Color(40, 40, 40),
         )

@@ -24,15 +24,15 @@ fun FieldTitle(text: String) {
             .padding(vertical = 1.dp)
             .background(Color(240, 241, 243))
             .border(1.dp, Color(229, 224, 221))
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 5.dp)
             .height(100.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
         Text(
             text = "$text ",
-            fontSize = 30.sp,
+            fontSize = 25.sp,
             fontFamily = roboto,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight(450),
             color = Color(0, 0, 0),
         )
     }
