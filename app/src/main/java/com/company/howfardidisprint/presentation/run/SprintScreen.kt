@@ -8,6 +8,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -58,17 +60,20 @@ fun SprintScreen(
     var speed by rememberSaveable { mutableStateOf(DistanceTracker.getLocation()?.speed ?: 0F) }
     var running by rememberSaveable { mutableStateOf(DistanceTracker.getStartTime() != null) }
     // Marked as experimental https://www.youtube.com/watch?v=1UujnB__Lek 17:70
-    val locationPermissionState = rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
+    val locationPermissionState =
+        rememberPermissionState(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
     // Screen orientation
     // This coroutine listens for changes in a key, everytime time is changed invoke the corutine again
     LaunchedEffect(key1 = time) {
         // If the running flag is still true
         if (DistanceTracker.getStartTime() != null) {
-            speed = DistanceTracker.getLocation()?.speed ?: 0F // Update speed variable with latest speed
+            speed = DistanceTracker.getLocation()?.speed
+                ?: 0F // Update speed variable with latest speed
             distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
             time = DistanceTracker.timeSinceStart()
             delay(1000L) // Wait 1/10 second
-            speed = DistanceTracker.getLocation()?.speed ?: 0F // Update speed variable with latest speed
+            speed = DistanceTracker.getLocation()?.speed
+                ?: 0F // Update speed variable with latest speed
             distance = DistanceTracker.getTotalDistance() // Update distance with latest speed
             time = DistanceTracker.timeSinceStart()
             if (distance >= DistanceTracker.getRunType().distance) {
@@ -103,11 +108,11 @@ fun SprintScreen(
                     .fillMaxWidth()
                     .padding(vertical = 10.dp)
             ) {
-                SubHeader("$runDistance")
+                SubHeader("RECORD A RUN")
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 10.dp),
+                        .padding(start = 10.dp, end = 10.dp, bottom = 20.dp),
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.Center
                 ) {
@@ -131,25 +136,47 @@ fun SprintScreen(
                         )
                     }
                 }
-                    OrangeButton(
-                        value =
-                        if (!locationPermissionState.hasPermission)
-                            "Allow GPS Permission"
-                        else if (!running)
-                            "Start"
-                        else "Stop"
-                    ) {
-                        // Permission check
-                        if (!locationPermissionState.hasPermission) {
-                            locationPermissionState.launchPermissionRequest()
-                        }
-                        // If not yet tracking, begin tracking
-                        else if (DistanceTracker.getStartTime() == null) {
-                            DistanceTracker.setTime()
-                            time = DistanceTracker.timeSinceStart()
-                            running = true
-                            startTracking() // Push information up to main activity to start this tracking
-                        }
+                CircleOrangeButton(
+                    imageVector =
+                    if (!running)
+                        Icons.Rounded.PlayArrow
+                    else Icons.Rounded.Pause,
+                ) {
+                    // Permission check
+                    if (!locationPermissionState.hasPermission) {
+                        locationPermissionState.launchPermissionRequest()
+                    }
+                    // If not yet tracking, begin tracking
+                    else if (DistanceTracker.getStartTime() == null) {
+                        DistanceTracker.setTime()
+                        time = DistanceTracker.timeSinceStart()
+                        running = true
+                        startTracking() // Push information up to main activity to start this tracking
+                    }
+                }
+                /*
+                OrangeButton(
+                    value =
+                    if (!locationPermissionState.hasPermission)
+                        "Allow GPS Permission"
+                    else if (!running)
+                        "Start"
+                    else "Stop"
+                ) {
+                    // Permission check
+                    if (!locationPermissionState.hasPermission) {
+                        locationPermissionState.launchPermissionRequest()
+                    }
+                    // If not yet tracking, begin tracking
+                    else if (DistanceTracker.getStartTime() == null) {
+                        DistanceTracker.setTime()
+                        time = DistanceTracker.timeSinceStart()
+                        running = true
+                        startTracking() // Push information up to main activity to start this tracking
+                    }
+                }
+                
+                 */
             }
         }
     }
