@@ -150,14 +150,6 @@ fun SprintScreen(
                             running = true
                             startTracking() // Push information up to main activity to start this tracking
                         }
-                    }
-                    WhiteButton(
-                        "View $runDistance History",
-                        onClick = {
-                            stopTracking()
-                            navController.navigate(Screen.HistoryScreen.route)
-                        }, PaddingValues(10.dp)
-                    )
             }
         }
     }

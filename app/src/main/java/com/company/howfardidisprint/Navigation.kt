@@ -82,24 +82,6 @@ fun Navigation(
                         )
                     }
                     composable(
-                        route = Screen.RunSelection.route,
-                        exitTransition = null,
-                        popEnterTransition = { _, _ ->
-                            slideInHorizontally(
-                                initialOffsetX = { -1200 },
-                                animationSpec = tween(400)
-                            )
-                        },
-                        enterTransition = null
-                    ) {
-                        RunSelectionScreen(
-                            navController = navController,
-                            onUpdateDistance = {
-                                DistanceTracker.setRunType(it)
-                            }
-                        )
-                    }
-                    composable(
                         route = Screen.SettingsScreen.route,
                     ) {
                         SettingsScreen(

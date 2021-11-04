@@ -28,7 +28,7 @@ val BottomNavItems = listOf(
     BottomNavItem(
         label = "Run",
         icon = Icons.Filled.RunCircle,
-        route = "runselection_screen"
+        route = "sprint_screen"
     ),
     BottomNavItem(
         label = "Settings",
