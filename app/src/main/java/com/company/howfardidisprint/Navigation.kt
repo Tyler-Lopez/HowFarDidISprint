@@ -57,7 +57,6 @@ fun Navigation(
                         enterTransition = null
                     ) {
                         SprintScreen(
-                            navController = navController,
                             startTracking = {
                                 startTracking()
                             }, stopTracking = {

@@ -44,7 +44,6 @@ import java.util.*
 @ExperimentalPermissionsApi
 @Composable
 fun SprintScreen(
-    navController: NavController,
     startTracking: () -> Unit,
     stopTracking: () -> Unit,
     runDistance: RunDistance,
@@ -136,6 +135,11 @@ fun SprintScreen(
                         )
                     }
                 }
+                // PLAY ICON
+                // Shape of the icon is variable dependent on if...
+                // 1. The app does not have GPS permission
+                // 2. The app is not currently recording
+                // 3. The app is currently recording
                 CircleOrangeButton(
                     imageVector =
                     if (!running)
@@ -153,15 +157,31 @@ fun SprintScreen(
                         running = true
                         startTracking() // Push information up to main activity to start this tracking
                     }
+                    // Otherwise we are currently recording and should stop
+                    else {
+                        running = false
+                        stopTracking()
+                    }
                 }
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                // SUBTEXT
+                // Provides context to the play icon button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Text(
-                        text = "Subtext example.",
+                        text = when {
+                            !locationPermissionState.hasPermission -> "Requires GPS Permission"
+                            running -> "Currently Recording"
+                            else -> "Press to Begin Recording"
+                        },
                         color = Color.Gray,
                         fontSize = 20.sp
                     )
                 }
-
             }
         }
     }
