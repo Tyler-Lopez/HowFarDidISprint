@@ -126,7 +126,7 @@ fun SprintScreen(
                     }
                 }
                 // PLAY ICON
-                // Shape of the icon is variable dependent on if...
+                // Shape of the icon is variable dependent on if:
                 // 1. The app does not have GPS permission
                 // 2. The app is not currently recording
                 // 3. The app is currently recording
